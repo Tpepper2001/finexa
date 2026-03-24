@@ -9,14 +9,14 @@
  *   VITE_SUPABASE_ANON_KEY
  */
 
-import { useState, useEffect, useCallback, createContext, useContext } from "react";
+import { useState, useEffect, useCallback, createContext, useContext, Component } from "react";
 import { createClient } from "@supabase/supabase-js";
 
 // ─── Supabase client ──────────────────────────────────────────────────────────
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-);
+// Safe Supabase init - prevents blank white page if env vars missing
+const SUPA_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPA_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabase = (SUPA_URL && SUPA_KEY) ? createClient(SUPA_URL, SUPA_KEY) : null;
 
 // ─── Design tokens (mirrors your CSS variables) ───────────────────────────────
 const T = {
@@ -43,6 +43,53 @@ const T = {
   fontMono:   "'Space Mono', monospace",
 };
 
+
+// ─── Error Boundary ───────────────────────────────────────────────────────────
+class ErrorBoundary extends Component {
+  constructor(props) { super(props); this.state = { error: null }; }
+  static getDerivedStateFromError(error) { return { error }; }
+  render() {
+    if (this.state.error) {
+      return (
+        <div style={{ minHeight:"100vh", background:"#0A0F1E", display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:"1rem", padding:"2rem", fontFamily:"sans-serif" }}>
+          <div style={{ color:"#C8A96E", fontSize:"1.8rem", fontWeight:800 }}>Finexa</div>
+          <div style={{ color:"#F5F4F0", fontSize:"1.1rem" }}>Something went wrong</div>
+          <div style={{ color:"#FF6B6B", background:"rgba(255,107,107,.1)", border:"1px solid rgba(255,107,107,.3)", padding:"1rem 1.5rem", maxWidth:520, fontSize:".8rem", wordBreak:"break-all", fontFamily:"monospace" }}>
+            {this.state.error.message}
+          </div>
+          <button onClick={() => window.location.reload()} style={{ background:"#C8A96E", color:"#0A0F1E", border:"none", padding:".75rem 1.5rem", fontWeight:700, cursor:"pointer", marginTop:".5rem" }}>
+            Reload
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+// ─── Missing env screen ───────────────────────────────────────────────────────
+function MissingEnv() {
+  return (
+    <div style={{ minHeight:"100vh", background:"#0A0F1E", display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:"1.25rem", padding:"2rem" }}>
+      <div style={{ color:"#C8A96E", fontSize:"1.6rem", fontWeight:800, fontFamily:"sans-serif" }}>Finexa</div>
+      <div style={{ color:"#1AFFB2", fontSize:".65rem", letterSpacing:".2em", textTransform:"uppercase", fontFamily:"monospace" }}>— Setup Required</div>
+      <div style={{ background:"#1C2340", border:"1px solid rgba(200,169,110,.18)", padding:"1.5rem 2rem", maxWidth:480, width:"100%" }}>
+        <div style={{ color:"#FF6B6B", fontSize:".75rem", marginBottom:"1rem", fontFamily:"monospace" }}>
+          Missing Supabase environment variables
+        </div>
+        <div style={{ color:"#5B6485", fontSize:".7rem", lineHeight:2, fontFamily:"monospace" }}>
+          Add these to Vercel → Project Settings → Environment Variables:<br/>
+          <span style={{ color:"#F5F4F0" }}>VITE_SUPABASE_URL</span><br/>
+          <span style={{ color:"#F5F4F0" }}>VITE_SUPABASE_ANON_KEY</span>
+        </div>
+      </div>
+      <div style={{ color:"#5B6485", fontSize:".62rem", textAlign:"center", maxWidth:380, fontFamily:"monospace" }}>
+        Get both values from Supabase Dashboard → Settings → API, then redeploy.
+      </div>
+    </div>
+  );
+}
+
 // ─── Auth context ─────────────────────────────────────────────────────────────
 const AuthCtx = createContext(null);
 const useAuth = () => useContext(AuthCtx);
@@ -52,6 +99,7 @@ function AuthProvider({ children }) {
   const [profile, setProfile]   = useState(null);
 
   useEffect(() => {
+    if (!supabase) { setSession(null); return; }
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => {
       setSession(s);
@@ -70,12 +118,12 @@ function AuthProvider({ children }) {
   }, [session]);
 
   const signIn = (email, password) =>
-    supabase.auth.signInWithPassword({ email, password });
+    supabase?.auth.signInWithPassword({ email, password });
 
   const signUp = (email, password, fullName) =>
-    supabase.auth.signUp({ email, password, options: { data: { full_name: fullName } } });
+    supabase?.auth.signUp({ email, password, options: { data: { full_name: fullName } } });
 
-  const signOut = () => supabase.auth.signOut();
+  const signOut = () => supabase?.auth.signOut();
 
   return (
     <AuthCtx.Provider value={{ session, profile, signIn, signUp, signOut, supabase }}>
@@ -1027,23 +1075,26 @@ function EmptyState({ icon, title, sub, compact }) {
 
 // ─── ROOT APP ─────────────────────────────────────────────────────────────────
 export default function App() {
+  if (!supabase) return <MissingEnv />;
   return (
-    <AuthProvider>
-      <Router>
-        <ToastProvider>
-          <style>{`
-            @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=Space+Mono:wght@400;700&display=swap');
-            *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-            body { background: #0A0F1E; color: #F5F4F0; font-family: 'DM Sans', sans-serif; }
-            @keyframes slideIn { from { opacity:0; transform:translateX(10px); } to { opacity:1; transform:none; } }
-            ::-webkit-scrollbar { width: 4px; } 
-            ::-webkit-scrollbar-track { background: #0A0F1E; }
-            ::-webkit-scrollbar-thumb { background: rgba(200,169,110,.3); }
-          `}</style>
-          <AppRoutes />
-        </ToastProvider>
-      </Router>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <Router>
+          <ToastProvider>
+            <style>{`
+              @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=Space+Mono:wght@400;700&display=swap');
+              *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+              body { background: #0A0F1E; color: #F5F4F0; font-family: 'DM Sans', sans-serif; }
+              @keyframes slideIn { from { opacity:0; transform:translateX(10px); } to { opacity:1; transform:none; } }
+              ::-webkit-scrollbar { width: 4px; }
+              ::-webkit-scrollbar-track { background: #0A0F1E; }
+              ::-webkit-scrollbar-thumb { background: rgba(200,169,110,.3); }
+            `}</style>
+            <AppRoutes />
+          </ToastProvider>
+        </Router>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
 
