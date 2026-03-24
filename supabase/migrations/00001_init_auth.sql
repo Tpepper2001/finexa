@@ -1,0 +1,3 @@
+-- Auth is managed by Supabase automatically.
+-- This migration documents the expected auth.users columns.
+-- No manual action required.
