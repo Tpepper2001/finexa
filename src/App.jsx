@@ -989,7 +989,7 @@ function SettingsPage() {
     <PageShell>
       <PageHeader title="Settings" sub="Manage your account and organization" />
       <div style={{ maxWidth:480, display:"flex", flexDirection:"column", gap:"1.5rem" }}>
-        <div style={{ background:T.mid, border:`1px solid ${T.border}`, padding:"2rem` }}>
+        <div style={{ background:T.mid, border:`1px solid ${T.border}`, padding:"2rem" }}>
           <div style={{ fontFamily:T.fontMono, fontSize:".62rem", color:T.electric, letterSpacing:".15em", textTransform:"uppercase", marginBottom:"1.5rem" }}>Profile</div>
           <div style={{ display:"flex", flexDirection:"column", gap:"1.25rem" }}>
             <Input label="Full Name" value={name} onChange={e => setName(e.target.value)} />
