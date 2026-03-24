@@ -415,6 +415,261 @@ function Modal({ open, onClose, title, children, width = 540 }) {
   );
 }
 
+
+// ─── LANDING PAGE ─────────────────────────────────────────────────────────────
+function LandingPage() {
+  const { navigate } = useRouter();
+  const { session } = useAuth();
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 60);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return (
+    <div style={{ background:T.ink, color:T.white, fontFamily:T.fontBody, overflowX:"hidden" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=Space+Mono:wght@400;700&display=swap');
+        @keyframes fadeUp { from { opacity:0; transform:translateY(28px); } to { opacity:1; transform:none; } }
+        @keyframes gradientShift { 0%,100% { background-position:0% 50%; } 50% { background-position:100% 50%; } }
+        @keyframes pulse { 0%,100% { transform:scale(1); opacity:1; } 50% { transform:scale(1.08); opacity:.7; } }
+        @keyframes ticker { from { transform:translateX(0); } to { transform:translateX(-50%); } }
+        @keyframes floatUp { 0% { opacity:0; transform:translateY(20px); } 20% { opacity:1; } 80% { opacity:1; } 100% { opacity:0; transform:translateY(-40px); } }
+        .land-reveal { opacity:0; transform:translateY(24px); transition:opacity .7s, transform .7s cubic-bezier(.16,1,.3,1); }
+        .land-reveal.visible { opacity:1; transform:none; }
+        .land-nav-link { font-size:.78rem; color:#5B6485; text-decoration:none; letter-spacing:.08em; font-weight:400; text-transform:uppercase; font-family:'Space Mono',monospace; padding:.4rem .6rem; transition:color .2s; }
+        .land-nav-link:hover { color:#F5F4F0; }
+        .hero-h1-land { font-family:'Syne',sans-serif; font-weight:800; font-size:clamp(3.2rem,8vw,8rem); line-height:1.05; letter-spacing:-.04em; }
+        .step-card-land:hover { border-color:rgba(200,169,110,.4) !important; transform:translateY(-4px); }
+        .feat-item-land:hover { background:rgba(200,169,110,.06) !important; border-left-color:#C8A96E !important; }
+        .testi-card-land:hover { border-color:rgba(200,169,110,.35) !important; }
+      `}</style>
+
+      {/* ── NAV ── */}
+      <nav style={{
+        position:"fixed", top:0, left:0, right:0, zIndex:200,
+        display:"flex", alignItems:"center", justifyContent:"space-between",
+        padding:"1.25rem 4rem",
+        background: scrolled ? "rgba(10,15,30,.95)" : "rgba(10,15,30,.6)",
+        backdropFilter:"blur(20px)",
+        borderBottom: scrolled ? `1px solid ${T.border}` : "1px solid transparent",
+        transition:"all .35s",
+      }}>
+        <a href="#/" style={{ display:"flex", alignItems:"center", gap:".6rem", textDecoration:"none" }}>
+          <svg width="26" height="26" viewBox="0 0 56 56" fill="none">
+            <rect x="1.5" y="1.5" width="53" height="53" rx="9" stroke={T.gold} strokeWidth="1.5"/>
+            <path d="M16 28 L28 14 L40 28 L28 42 Z" fill={T.gold} opacity="0.9"/>
+            <line x1="28" y1="12" x2="28" y2="44" stroke={T.electric} strokeWidth="2" strokeLinecap="round"/>
+          </svg>
+          <span style={{ fontFamily:T.fontDisplay, fontWeight:800, fontSize:"1.1rem", color:T.white, letterSpacing:"-.03em" }}>
+            Fine<span style={{ color:T.gold }}>x</span>a
+          </span>
+        </a>
+
+        <div style={{ display:"flex", alignItems:"center", gap:"2rem" }}>
+          <a href="#features" className="land-nav-link">Features</a>
+          <a href="#how"      className="land-nav-link">How It Works</a>
+          <a href="#pricing"  className="land-nav-link">Pricing</a>
+          {session ? (
+            <button onClick={() => navigate("/dashboard")} style={{ background:T.gold, color:T.ink, fontFamily:T.fontDisplay, fontWeight:700, fontSize:".78rem", padding:".55rem 1.25rem", border:"none", cursor:"pointer", letterSpacing:".04em" }}>
+              Go to App →
+            </button>
+          ) : (
+            <div style={{ display:"flex", gap:".75rem" }}>
+              <button onClick={() => navigate("/login")} style={{ background:"transparent", color:T.white, fontFamily:T.fontDisplay, fontWeight:600, fontSize:".78rem", padding:".55rem 1.25rem", border:`1px solid ${T.border}`, cursor:"pointer", letterSpacing:".04em", transition:"border-color .2s" }}>
+                Sign In
+              </button>
+              <button onClick={() => navigate("/login")} style={{ background:T.gold, color:T.ink, fontFamily:T.fontDisplay, fontWeight:700, fontSize:".78rem", padding:".55rem 1.25rem", border:"none", cursor:"pointer", letterSpacing:".04em" }}>
+                Get Started Free
+              </button>
+            </div>
+          )}
+        </div>
+      </nav>
+
+      {/* ── HERO ── */}
+      <section style={{ minHeight:"100vh", display:"flex", flexDirection:"column", justifyContent:"center", padding:"8rem 4rem 5rem", position:"relative", overflow:"hidden" }}>
+        {/* Orbs */}
+        <div style={{ position:"absolute", top:"-15%", right:"-8%", width:"55vw", height:"55vw", maxWidth:650, borderRadius:"50%", background:`radial-gradient(ellipse, rgba(200,169,110,.11), transparent 70%)`, animation:"pulse 6s ease-in-out infinite", pointerEvents:"none" }}/>
+        <div style={{ position:"absolute", bottom:"-20%", left:"-10%", width:"45vw", height:"45vw", maxWidth:500, borderRadius:"50%", background:`radial-gradient(ellipse, rgba(26,255,178,.07), transparent 70%)`, animation:"pulse 8s ease-in-out infinite reverse", pointerEvents:"none" }}/>
+        {/* Grid */}
+        <div style={{ position:"absolute", inset:0, backgroundImage:`linear-gradient(rgba(200,169,110,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(200,169,110,.04) 1px, transparent 1px)`, backgroundSize:"60px 60px", pointerEvents:"none" }}/>
+
+        <div style={{ position:"relative", maxWidth:900 }}>
+          <div style={{ fontFamily:T.fontMono, fontSize:".68rem", letterSpacing:".2em", color:T.electric, textTransform:"uppercase", marginBottom:"1.75rem", display:"flex", alignItems:"center", gap:".75rem", opacity:0, animation:"fadeUp .8s .1s cubic-bezier(.16,1,.3,1) forwards" }}>
+            <span style={{ display:"inline-block", width:"2rem", height:"1px", background:T.electric }}/>
+            Payroll · Invoicing · Teller · Receipts
+          </div>
+
+          <h1 className="hero-h1-land" style={{ opacity:0, animation:"fadeUp .9s .22s cubic-bezier(.16,1,.3,1) forwards" }}>
+            <span style={{ display:"block", color:T.white }}>Finance,</span>
+            <span style={{ display:"block", background:`linear-gradient(135deg, ${T.goldLt}, ${T.gold} 40%, ${T.electric})`, WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text", backgroundSize:"200% 200%", animation:"gradientShift 4s ease-in-out infinite 1.5s" }}>Engineered</span>
+            <span style={{ display:"block", color:T.gold }}>for What's Next.</span>
+          </h1>
+
+          <p style={{ marginTop:"2.5rem", maxWidth:500, fontSize:"1rem", lineHeight:1.75, color:T.slate, opacity:0, animation:"fadeUp .8s .4s cubic-bezier(.16,1,.3,1) forwards" }}>
+            <strong style={{ color:T.white, fontWeight:500 }}>Finexa</strong> is smart financial software that helps businesses handle payments, payroll, invoices, and receipts — all in one place.
+          </p>
+
+          <div style={{ display:"flex", gap:"1rem", flexWrap:"wrap", marginTop:"3rem", opacity:0, animation:"fadeUp .9s .5s cubic-bezier(.16,1,.3,1) forwards" }}>
+            <button onClick={() => navigate("/login")} style={{ background:T.gold, color:T.ink, fontFamily:T.fontDisplay, fontWeight:700, fontSize:".9rem", padding:".9rem 2.25rem", border:"none", cursor:"pointer", letterSpacing:".05em", transition:"all .2s" }}
+              onMouseEnter={e => e.currentTarget.style.background = T.goldLt}
+              onMouseLeave={e => e.currentTarget.style.background = T.gold}>
+              Start Free Trial →
+            </button>
+            <button style={{ background:"transparent", color:T.white, fontFamily:T.fontDisplay, fontWeight:600, fontSize:".9rem", padding:".9rem 2.25rem", border:`1px solid ${T.border}`, cursor:"pointer", letterSpacing:".05em", transition:"all .2s" }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = T.gold; e.currentTarget.style.color = T.gold; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = T.border; e.currentTarget.style.color = T.white; }}>
+              Watch Demo
+            </button>
+          </div>
+
+          {/* Stats */}
+          <div style={{ display:"flex", gap:"3.5rem", flexWrap:"wrap", marginTop:"4.5rem", paddingTop:"2.5rem", borderTop:`1px solid ${T.border}`, opacity:0, animation:"fadeUp .9s .65s cubic-bezier(.16,1,.3,1) forwards" }}>
+            {[["₦2.4B+","Processed Monthly"],["28K+","Active Businesses"],["99.9%","Uptime SLA"],["1-Click","Payroll Run"]].map(([num, label]) => (
+              <div key={label}>
+                <div style={{ fontFamily:T.fontDisplay, fontWeight:800, fontSize:"2rem", color:T.white, letterSpacing:"-.03em" }}>
+                  <span style={{ color:T.gold }}>{num}</span>
+                </div>
+                <div style={{ fontSize:".72rem", color:T.slate, marginTop:".2rem", fontFamily:T.fontMono, letterSpacing:".08em", textTransform:"uppercase" }}>{label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── TICKER ── */}
+      <div style={{ background:T.mid, borderTop:`1px solid ${T.border}`, borderBottom:`1px solid ${T.border}`, overflow:"hidden", padding:".65rem 0", position:"relative" }}>
+        <div style={{ display:"flex", animation:"ticker 30s linear infinite", whiteSpace:"nowrap" }}>
+          {[...Array(2)].map((_, i) => (
+            <div key={i} style={{ display:"flex", gap:"3rem", paddingRight:"3rem" }}>
+              {["PAYROLL PROCESSED","INVOICE SENT","RECEIPT LOGGED","TELLER BALANCED","PAYMENT RECEIVED","FX RATE LOCKED","TAX FILED","AUDIT READY"].map(t => (
+                <span key={t} style={{ fontFamily:T.fontMono, fontSize:".65rem", color:T.slate, letterSpacing:".12em" }}>
+                  <span style={{ color:T.electric, marginRight:".5rem" }}>◆</span>{t}
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── FEATURES ── */}
+      <section id="features" style={{ padding:"8rem 4rem" }}>
+        <div style={{ maxWidth:1100, margin:"0 auto" }}>
+          <div style={{ fontFamily:T.fontMono, fontSize:".62rem", color:T.electric, letterSpacing:".2em", textTransform:"uppercase", marginBottom:"1rem" }}>— What's Inside</div>
+          <h2 style={{ fontFamily:T.fontDisplay, fontWeight:800, fontSize:"clamp(2rem,5vw,4rem)", color:T.white, letterSpacing:"-.03em", marginBottom:"4rem" }}>
+            Everything your finance<br/>team actually needs
+          </h2>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(240px, 1fr))", gap:"1.5rem" }}>
+            {[
+              { icon:"◻", title:"Invoicing",      desc:"Create and send professional invoices. Track status in real time — draft, sent, paid, or overdue." },
+              { icon:"◈", title:"Payroll",         desc:"Add employees, set salaries, and run payroll in one click. PAYE and pension calculated automatically." },
+              { icon:"◉", title:"Receipts",        desc:"Upload and organise expense receipts. Attach files, tag merchants, and filter by category." },
+              { icon:"⬡", title:"Teller Console",  desc:"Record cash-in and cash-out entries with a numpad interface. Full daily ledger with session history." },
+              { icon:"▦", title:"Dashboard",       desc:"Live stats on transactions, invoices, and payroll. Realtime updates powered by Supabase." },
+              { icon:"◎", title:"Secure by Design",desc:"Row-level security on every table. Your data is only visible to your organisation — nobody else." },
+            ].map(f => (
+              <div key={f.title} className="feat-item-land" style={{ background:T.mid, border:`1px solid ${T.border}`, borderLeft:`2px solid transparent`, padding:"2rem", transition:"all .2s", cursor:"default" }}>
+                <div style={{ fontSize:"1.75rem", color:T.gold, marginBottom:"1rem" }}>{f.icon}</div>
+                <div style={{ fontFamily:T.fontDisplay, fontWeight:700, color:T.white, fontSize:"1rem", marginBottom:".6rem" }}>{f.title}</div>
+                <div style={{ fontSize:".82rem", color:T.slate, lineHeight:1.7 }}>{f.desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── HOW IT WORKS ── */}
+      <section id="how" style={{ padding:"8rem 4rem", background:T.mid }}>
+        <div style={{ maxWidth:1000, margin:"0 auto" }}>
+          <div style={{ fontFamily:T.fontMono, fontSize:".62rem", color:T.electric, letterSpacing:".2em", textTransform:"uppercase", marginBottom:"1rem" }}>— Getting Started</div>
+          <h2 style={{ fontFamily:T.fontDisplay, fontWeight:800, fontSize:"clamp(2rem,5vw,3.5rem)", color:T.white, letterSpacing:"-.03em", marginBottom:"4rem" }}>Up and running<br/>in minutes</h2>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(200px, 1fr))", gap:"2rem" }}>
+            {[
+              { n:"01", title:"Create Account",  desc:"Sign up free. No credit card required. Your workspace is ready instantly." },
+              { n:"02", title:"Set Up Your Org", desc:"Add your business name, logo, and team members in Settings." },
+              { n:"03", title:"Add Employees",   desc:"Import or manually add your staff with salaries and bank details." },
+              { n:"04", title:"Start Transacting",desc:"Create invoices, run payroll, upload receipts, and open your teller." },
+            ].map((s, i) => (
+              <div key={s.n} className="step-card-land" style={{ border:`1px solid ${T.border}`, padding:"2rem", background:T.ink, transition:"all .25s", cursor:"default" }}>
+                <div style={{ fontFamily:T.fontMono, fontSize:"2.5rem", fontWeight:700, color:T.gold25, marginBottom:"1.25rem", lineHeight:1 }}>{s.n}</div>
+                <div style={{ fontFamily:T.fontDisplay, fontWeight:700, color:T.white, fontSize:"1rem", marginBottom:".6rem" }}>{s.title}</div>
+                <div style={{ fontSize:".82rem", color:T.slate, lineHeight:1.7 }}>{s.desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── TESTIMONIALS ── */}
+      <section style={{ padding:"8rem 4rem" }}>
+        <div style={{ maxWidth:1100, margin:"0 auto" }}>
+          <div style={{ fontFamily:T.fontMono, fontSize:".62rem", color:T.electric, letterSpacing:".2em", textTransform:"uppercase", marginBottom:"1rem" }}>— Trusted By</div>
+          <h2 style={{ fontFamily:T.fontDisplay, fontWeight:800, fontSize:"clamp(2rem,5vw,3.5rem)", color:T.white, letterSpacing:"-.03em", marginBottom:"4rem" }}>What our customers say</h2>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(280px, 1fr))", gap:"1.5rem" }}>
+            {[
+              { quote:"Payroll used to take us 3 days. With Finexa it's done before lunch.", name:"Ada Okonkwo", role:"CFO, Acme Corp Lagos" },
+              { quote:"The teller console is exactly what our branch staff needed. Simple and fast.", name:"Chidi Eze", role:"Operations Lead, Starfield Finance" },
+              { quote:"Finally a fintech tool built for how Nigerian businesses actually work.", name:"Ngozi Adeyemi", role:"Founder, Blue Horizon Ltd" },
+            ].map(t => (
+              <div key={t.name} className="testi-card-land" style={{ background:T.mid, border:`1px solid ${T.border}`, padding:"2rem", transition:"border-color .2s", cursor:"default" }}>
+                <div style={{ fontSize:"1.5rem", color:T.gold, marginBottom:"1rem" }}>"</div>
+                <p style={{ fontSize:".88rem", color:T.white80, lineHeight:1.75, marginBottom:"1.5rem" }}>{t.quote}</p>
+                <div style={{ fontFamily:T.fontDisplay, fontWeight:700, color:T.white, fontSize:".85rem" }}>{t.name}</div>
+                <div style={{ fontFamily:T.fontMono, fontSize:".62rem", color:T.slate, marginTop:".2rem", letterSpacing:".06em" }}>{t.role}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA ── */}
+      <section id="pricing" style={{ padding:"8rem 4rem", background:T.mid, textAlign:"center" }}>
+        <div style={{ maxWidth:640, margin:"0 auto" }}>
+          <div style={{ fontFamily:T.fontMono, fontSize:".62rem", color:T.electric, letterSpacing:".2em", textTransform:"uppercase", marginBottom:"1rem" }}>— Get Started Today</div>
+          <h2 style={{ fontFamily:T.fontDisplay, fontWeight:800, fontSize:"clamp(2.5rem,6vw,5rem)", color:T.white, letterSpacing:"-.04em", lineHeight:1.05, marginBottom:"1.5rem" }}>
+            Ready to take control of your finances?
+          </h2>
+          <p style={{ color:T.slate, fontSize:"1rem", lineHeight:1.75, marginBottom:"3rem" }}>
+            Free to start. No credit card. No setup fees.<br/>Just fast, reliable financial tools for your business.
+          </p>
+          <button onClick={() => navigate("/login")} style={{ background:T.gold, color:T.ink, fontFamily:T.fontDisplay, fontWeight:700, fontSize:"1rem", padding:"1rem 2.5rem", border:"none", cursor:"pointer", letterSpacing:".05em", transition:"all .2s" }}
+            onMouseEnter={e => e.currentTarget.style.background = T.goldLt}
+            onMouseLeave={e => e.currentTarget.style.background = T.gold}>
+            Create Your Free Account →
+          </button>
+        </div>
+      </section>
+
+      {/* ── FOOTER ── */}
+      <footer style={{ background:T.ink, borderTop:`1px solid ${T.border}`, padding:"4rem", display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:"1.5rem" }}>
+        <div style={{ display:"flex", alignItems:"center", gap:".6rem" }}>
+          <svg width="22" height="22" viewBox="0 0 56 56" fill="none">
+            <rect x="1.5" y="1.5" width="53" height="53" rx="9" stroke={T.gold} strokeWidth="1.5"/>
+            <path d="M16 28 L28 14 L40 28 L28 42 Z" fill={T.gold} opacity="0.9"/>
+            <line x1="28" y1="12" x2="28" y2="44" stroke={T.electric} strokeWidth="2" strokeLinecap="round"/>
+          </svg>
+          <span style={{ fontFamily:T.fontDisplay, fontWeight:800, fontSize:"1rem", color:T.white }}>Fine<span style={{ color:T.gold }}>x</span>a</span>
+        </div>
+        <div style={{ fontFamily:T.fontMono, fontSize:".62rem", color:T.slate, letterSpacing:".08em" }}>
+          © {new Date().getFullYear()} Finexa. Finance, Engineered for What's Next.
+        </div>
+        <div style={{ display:"flex", gap:"1.5rem" }}>
+          {["Privacy","Terms","Support"].map(l => (
+            <a key={l} href="#/" style={{ fontFamily:T.fontMono, fontSize:".62rem", color:T.slate, letterSpacing:".08em", textDecoration:"none", transition:"color .2s" }}
+              onMouseEnter={e => e.currentTarget.style.color = T.gold}
+              onMouseLeave={e => e.currentTarget.style.color = T.slate}>
+              {l}
+            </a>
+          ))}
+        </div>
+      </footer>
+    </div>
+  );
+}
+
 // ─── LOGIN PAGE ───────────────────────────────────────────────────────────────
 function LoginPage() {
   const { signIn, signUp } = useAuth();
@@ -1113,18 +1368,21 @@ function AppRoutes() {
     );
   }
 
-  // Auth guard
-  const protectedPaths = ["/dashboard","/invoices","/payroll","/receipts","/teller","/settings"];
-  if (!session && protectedPaths.some(p => path.startsWith(p))) {
-    return <LoginPage />;
-  }
+  // Logged-in users skip landing and go straight to dashboard
   if (session && path === "/") {
     navigate("/dashboard");
     return null;
   }
 
+  // Protect app routes — redirect to login if not signed in
+  const protectedPaths = ["/dashboard","/invoices","/payroll","/receipts","/teller","/settings"];
+  if (!session && protectedPaths.some(p => path.startsWith(p))) {
+    return <LoginPage />;
+  }
+
   // Route table
-  if (path === "/" || path === "/login")       return <LoginPage />;
+  if (path === "/")                            return <LandingPage />;
+  if (path === "/login")                       return <LoginPage />;
   if (path.startsWith("/dashboard"))           return <DashboardPage />;
   if (path.startsWith("/invoices"))            return <InvoicesPage />;
   if (path.startsWith("/payroll"))             return <PayrollPage />;
@@ -1136,7 +1394,7 @@ function AppRoutes() {
     <div style={{ minHeight:"100vh", background:T.ink, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center" }}>
       <div style={{ fontFamily:T.fontDisplay, fontWeight:800, fontSize:"6rem", color:T.gold25 }}>404</div>
       <div style={{ color:T.slate, fontFamily:T.fontMono, fontSize:".8rem", marginTop:"1rem" }}>Page not found</div>
-      <Btn onClick={() => navigate("/dashboard")} style={{ marginTop:"2rem" }}>← Back to Dashboard</Btn>
+      <Btn onClick={() => navigate("/")} style={{ marginTop:"2rem" }}>← Back to Home</Btn>
     </div>
   );
 }
