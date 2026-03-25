@@ -1,5 +1,5 @@
 /**
- * Finexa — App.jsx  (fully enhanced)
+ * Finexa — App.jsx  (fully enhanced, syntax fixed)
  * - Landing page with all animations restored
  * - Every button and nav link wired up
  * - Scroll-reveal on sections
@@ -1318,8 +1318,13 @@ function RecentTransactions({ supabase }) {
     <table style={{ width:"100%", borderCollapse:"collapse" }}>
       <thead>
         <tr>
-          {["Reference","Type","Amount","Date"].map(h => <th key={h} style={{ fontFamily:T.fontMono, fontSize:".6rem", color:T.slate, letterSpacing:".1em", textTransform:"uppercase", textAlign:"left", paddingBottom:".75rem", borderBottom:`1px solid ${T.border}` }}>{h}</th>)}
-        </thead>
+          {["Reference","Type","Amount","Date"].map(h => (
+            <th key={h} style={{ fontFamily:T.fontMono, fontSize:".6rem", color:T.slate, letterSpacing:".1em", textTransform:"uppercase", textAlign:"left", paddingBottom:".75rem", borderBottom:`1px solid ${T.border}` }}>
+              {h}
+            </th>
+          ))}
+        </tr>
+      </thead>
       <tbody>
         {rows.map(r => (
           <tr key={r.id}>
@@ -1337,7 +1342,7 @@ function RecentTransactions({ supabase }) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// INVOICES (unchanged)
+// INVOICES
 // ═══════════════════════════════════════════════════════════════
 function InvoicesPage() {
   const { supabase } = useAuth();
@@ -1440,7 +1445,7 @@ function InvoiceFormModal({ open, onClose, onSaved, supabase }) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// PAYROLL (unchanged)
+// PAYROLL
 // ═══════════════════════════════════════════════════════════════
 function PayrollPage() {
   const { supabase } = useAuth();
@@ -1655,7 +1660,7 @@ function ReceiptFormModal({ open, onClose, onSaved, supabase }) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// TELLER (unchanged)
+// TELLER
 // ═══════════════════════════════════════════════════════════════
 function TellerPage() {
   const { supabase } = useAuth();
@@ -1763,7 +1768,7 @@ function TellerPage() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// SETTINGS (unchanged)
+// SETTINGS
 // ═══════════════════════════════════════════════════════════════
 function SettingsPage() {
   const { supabase, profile } = useAuth();
