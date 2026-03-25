@@ -1,15 +1,18 @@
 /**
- * Finexa — App.jsx  (fully responsive)
- * - Landing page with all animations restored
- * - Every button and nav link wired up
- * - Scroll-reveal on sections
- * - Particle system, orbs, grid drift
- * - Hash router: / → Landing, /login → Auth, /dashboard etc → App
- * - Fixed navbar links (smooth scroll to sections)
- * - Interactive Demo Modal (JS animations, not video)
- * - Added Benefits Section (including module syncing)
- * - Receipts: manual creation + upload
- * - Fully responsive for all screen sizes (mobile, tablet, desktop)
+ * Finexa — App.jsx  (fully responsive, all issues fixed)
+ * Fixes:
+ * - Hamburger hidden on desktop, shown on mobile only
+ * - Nav links properly toggled on mobile
+ * - btn-land-primary / btn-land-secondary CSS defined in GLOBAL_CSS
+ * - feat-card, benefit-card, testi-card, price-card, step-card styles defined
+ * - price-card.featured style defined
+ * - Duplicate style prop on feature cards removed
+ * - Payroll grid responsive (1fr on mobile, 1fr 1fr on desktop)
+ * - Teller grid responsive (1fr on mobile, 360px 1fr on desktop)
+ * - Main content left padding accounts for sidebar on desktop
+ * - Sidebar mobile overlay backdrop added
+ * - Missing CSS for all card components
+ * - All structural layout issues resolved
  */
 
 import { useState, useEffect, useCallback, useRef, createContext, useContext, Component } from "react";
@@ -69,151 +72,527 @@ const GLOBAL_CSS = `
   .reveal-slide { opacity:0; transform:translateX(-20px); transition:opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1); }
   .reveal-slide.visible { opacity:1; transform:none; }
 
-  .nav-link-land { font-size:.75rem; color:#5B6485; text-decoration:none; letter-spacing:.1em; text-transform:uppercase; font-family:'Space Mono',monospace; padding:.4rem .5rem; transition:color .2s; }
+  /* ── NAV LINK ── */
+  .nav-link-land {
+    font-size:.75rem;
+    color:#5B6485;
+    text-decoration:none;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    font-family:'Space Mono',monospace;
+    padding:.4rem .5rem;
+    transition:color .2s;
+    background:none;
+    border:none;
+    cursor:pointer;
+  }
   .nav-link-land:hover { color:#F5F4F0; }
 
-  /* Responsive navbar */
-  @media (max-width: 768px) {
+  /* ── BUTTONS ── */
+  .btn-land-primary {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    background:#C8A96E;
+    color:#0A0F1E;
+    font-family:'Syne',system-ui,sans-serif;
+    font-weight:700;
+    font-size:.82rem;
+    letter-spacing:.05em;
+    padding:.75rem 1.5rem;
+    border:none;
+    cursor:pointer;
+    transition:background .2s,transform .15s;
+    white-space:nowrap;
+    text-decoration:none;
+  }
+  .btn-land-primary:hover { background:#E4CFA0; transform:translateY(-1px); }
+
+  .btn-land-secondary {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    background:transparent;
+    color:#F5F4F0;
+    font-family:'Syne',system-ui,sans-serif;
+    font-weight:700;
+    font-size:.82rem;
+    letter-spacing:.05em;
+    padding:.75rem 1.5rem;
+    border:1px solid rgba(200,169,110,.18);
+    cursor:pointer;
+    transition:border-color .2s,background .2s,transform .15s;
+    white-space:nowrap;
+    text-decoration:none;
+  }
+  .btn-land-secondary:hover { border-color:#C8A96E; background:rgba(200,169,110,.08); transform:translateY(-1px); }
+
+  /* ── CARD STYLES ── */
+  .feat-card {
+    background:#1C2340;
+    border:1px solid rgba(200,169,110,.18);
+    padding:2rem;
+    transition:border-color .2s, transform .2s, box-shadow .2s;
+    cursor:default;
+  }
+  .feat-card:hover {
+    border-color:rgba(200,169,110,.5);
+    transform:translateY(-3px);
+    box-shadow:0 12px 40px rgba(0,0,0,.3);
+  }
+
+  .benefit-card {
+    background:#1C2340;
+    border:1px solid rgba(200,169,110,.18);
+    padding:2rem;
+    border-radius:.5rem;
+    transition:border-color .2s, transform .2s;
+  }
+  .benefit-card:hover {
+    border-color:rgba(200,169,110,.5);
+    transform:translateY(-3px);
+  }
+
+  .testi-card {
+    background:#1C2340;
+    border:1px solid rgba(200,169,110,.18);
+    padding:2rem;
+    border-radius:.5rem;
+    transition:border-color .2s;
+  }
+  .testi-card:hover { border-color:rgba(200,169,110,.5); }
+
+  .price-card {
+    background:#1C2340;
+    border:1px solid rgba(200,169,110,.18);
+    padding:2.5rem 2rem;
+    border-radius:.5rem;
+    display:flex;
+    flex-direction:column;
+    transition:border-color .2s, transform .2s, box-shadow .2s;
+  }
+  .price-card:hover {
+    border-color:rgba(200,169,110,.5);
+    transform:translateY(-4px);
+    box-shadow:0 16px 48px rgba(0,0,0,.35);
+  }
+  .price-card.featured {
+    border-color:rgba(26,255,178,.4);
+    background:linear-gradient(135deg,#1C2340 80%,rgba(26,255,178,.06));
+    box-shadow:0 0 40px rgba(26,255,178,.08);
+    transform:scale(1.03);
+  }
+  .price-card.featured:hover {
+    border-color:rgba(26,255,178,.7);
+    transform:scale(1.03) translateY(-4px);
+  }
+
+  .step-card {
+    background:#1C2340;
+    border:1px solid rgba(200,169,110,.18);
+    padding:2rem;
+    border-radius:.5rem;
+  }
+
+  /* ── HAMBURGER: hide on desktop, show on mobile ── */
+  .hamburger {
+    display:none;
+  }
+  @media (max-width:768px) {
+    .hamburger {
+      display:block;
+    }
+  }
+
+  /* ── NAV LINKS: shown on desktop, hidden on mobile unless .open ── */
+  .nav-links {
+    display:flex;
+    gap:1.75rem;
+    align-items:center;
+  }
+  @media (max-width:768px) {
     .nav-links {
-      display: none;
+      display:none;
     }
     .nav-links.open {
-      display: flex;
-      flex-direction: column;
-      position: fixed;
-      top: 70px;
-      left: 0;
-      right: 0;
-      background: rgba(10,15,30,.98);
-      backdrop-filter: blur(20px);
-      padding: 2rem;
-      gap: 1.5rem;
-      border-bottom: 1px solid rgba(200,169,110,.18);
-      z-index: 200;
+      display:flex;
+      flex-direction:column;
+      align-items:stretch;
+      position:fixed;
+      top:64px;
+      left:0;
+      right:0;
+      background:rgba(10,15,30,.98);
+      backdrop-filter:blur(20px);
+      -webkit-backdrop-filter:blur(20px);
+      padding:1.5rem 2rem 2rem;
+      gap:1rem;
+      border-bottom:1px solid rgba(200,169,110,.18);
+      z-index:199;
     }
     .nav-links.open .nav-link-land {
-      font-size: 1rem;
-      text-align: center;
+      font-size:.9rem;
+      padding:.75rem 0;
+      border-bottom:1px solid rgba(200,169,110,.08);
+      text-align:left;
+    }
+    .nav-links.open .btn-land-primary,
+    .nav-links.open .btn-land-secondary {
+      width:100%;
+      justify-content:center;
+      font-size:.85rem;
+      padding:.8rem 1rem;
     }
     .nav-actions {
-      gap: 0.5rem;
-    }
-    .nav-actions button {
-      padding: 0.4rem 0.8rem;
-      font-size: 0.7rem;
-    }
-  }
-
-  /* Feature cards, benefit cards, etc. */
-  @media (max-width: 768px) {
-    .feat-card, .benefit-card, .testi-card, .price-card {
-      padding: 1.5rem;
-    }
-    .step-card {
-      padding: 1.5rem;
-    }
-    .price-card .btn-land-primary, .price-card .btn-land-secondary {
-      padding: 0.6rem;
-      font-size: 0.75rem;
+      display:flex;
+      flex-direction:column;
+      gap:.75rem;
+      width:100%;
     }
   }
 
-  @media (max-width: 480px) {
-    .feat-card, .benefit-card, .testi-card, .price-card {
-      padding: 1rem;
-    }
-    .step-card {
-      padding: 1rem;
+  /* ── NAV ACTIONS on desktop ── */
+  @media (min-width:769px) {
+    .nav-actions {
+      display:flex;
+      gap:.75rem;
+      align-items:center;
     }
   }
 
-  /* Sidebar responsive */
-  @media (max-width: 1024px) {
+  /* ── BUTTON RESPONSIVE FIXES ── */
+  @media (max-width:480px) {
+    .btn-land-primary,
+    .btn-land-secondary {
+      white-space:normal;
+      padding:.65rem 1rem;
+      font-size:.78rem;
+    }
+    .feat-card, .benefit-card, .testi-card, .price-card { padding:1.5rem; }
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    position:fixed;
+    top:0;
+    left:0;
+    bottom:0;
+    background:rgba(10,15,30,.96);
+    border-right:1px solid rgba(200,169,110,.18);
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+    display:flex;
+    flex-direction:column;
+    padding:2rem 1.75rem;
+    z-index:300;
+    width:220px;
+    transition:transform .3s cubic-bezier(.16,1,.3,1);
+  }
+
+  /* ── SIDEBAR TOGGLE BUTTON: only on mobile/tablet ── */
+  .sidebar-toggle {
+    display:none;
+  }
+  @media (max-width:1024px) {
     .sidebar {
-      transform: translateX(-100%);
-      transition: transform 0.3s ease;
-      width: 260px;
+      width:260px;
+      transform:translateX(-100%);
     }
     .sidebar.open {
-      transform: translateX(0);
+      transform:translateX(0);
     }
+    .sidebar-toggle {
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position:fixed;
+      top:1rem;
+      left:1rem;
+      z-index:400;
+      background:rgba(200,169,110,.15);
+      border:1px solid rgba(200,169,110,.3);
+      border-radius:.5rem;
+      padding:.5rem .65rem;
+      cursor:pointer;
+      backdrop-filter:blur(10px);
+      color:#F5F4F0;
+      font-size:1.1rem;
+      line-height:1;
+    }
+  }
+
+  /* ── SIDEBAR BACKDROP OVERLAY on mobile ── */
+  .sidebar-backdrop {
+    display:none;
+  }
+  @media (max-width:1024px) {
+    .sidebar-backdrop {
+      display:block;
+      position:fixed;
+      inset:0;
+      background:rgba(10,15,30,.7);
+      backdrop-filter:blur(4px);
+      z-index:299;
+    }
+  }
+
+  /* ── MAIN CONTENT PADDING ── */
+  .main-content {
+    padding:3rem 3.5rem 3rem calc(220px + 3.5rem);
+    min-height:100vh;
+    transition:padding .3s;
+  }
+  @media (max-width:1024px) {
     .main-content {
-      padding-left: 0 !important;
-    }
-    .sidebar-toggle {
-      display: block;
-      position: fixed;
-      top: 1rem;
-      left: 1rem;
-      z-index: 1000;
-      background: rgba(200,169,110,.2);
-      border: 1px solid rgba(200,169,110,.3);
-      border-radius: 0.5rem;
-      padding: 0.5rem;
-      cursor: pointer;
-      backdrop-filter: blur(10px);
+      padding:3rem 2rem 3rem 2rem;
     }
   }
-  @media (min-width: 1025px) {
-    .sidebar-toggle {
-      display: none;
+  @media (max-width:640px) {
+    .main-content {
+      padding:4rem 1.25rem 2rem;
     }
   }
 
-  .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    background: rgba(10,15,30,.93);
-    border-right: 1px solid rgba(200,169,110,.18);
-    backdrop-filter: blur(20px);
-    display: flex;
-    flex-direction: column;
-    padding: 2rem 1.75rem;
-    z-index: 200;
-    width: 220px;
+  /* ── PAYROLL GRID: responsive ── */
+  .payroll-grid {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:2rem;
   }
-  @media (max-width: 1024px) {
-    .sidebar {
-      width: 260px;
+  @media (max-width:768px) {
+    .payroll-grid {
+      grid-template-columns:1fr;
     }
   }
 
-  .btn-land-primary, .btn-land-secondary {
-    white-space: nowrap;
+  /* ── TELLER GRID: responsive ── */
+  .teller-grid {
+    display:grid;
+    grid-template-columns:360px 1fr;
+    gap:2.5rem;
+    align-items:start;
   }
-  @media (max-width: 480px) {
-    .btn-land-primary, .btn-land-secondary {
-      white-space: normal;
-      padding: 0.6rem 1rem;
-    }
-  }
-
-  /* Teller console responsiveness */
-  @media (max-width: 768px) {
+  @media (max-width:900px) {
     .teller-grid {
-      grid-template-columns: 1fr !important;
-      gap: 1.5rem !important;
+      grid-template-columns:1fr;
     }
   }
 
-  /* Dashboard cards */
-  @media (max-width: 640px) {
+  /* ── STATS GRID: responsive ── */
+  .stats-grid {
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:1.25rem;
+    margin-bottom:3rem;
+  }
+  @media (max-width:900px) {
     .stats-grid {
-      grid-template-columns: 1fr 1fr !important;
-    }
-    .quick-actions {
-      grid-template-columns: 1fr 1fr !important;
+      grid-template-columns:repeat(2,1fr);
     }
   }
-  @media (max-width: 480px) {
+  @media (max-width:480px) {
     .stats-grid {
-      grid-template-columns: 1fr !important;
+      grid-template-columns:1fr;
     }
+  }
+
+  /* ── QUICK ACTIONS: responsive ── */
+  .quick-actions {
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:1rem;
+    margin-bottom:3rem;
+  }
+  @media (max-width:900px) {
     .quick-actions {
-      grid-template-columns: 1fr !important;
+      grid-template-columns:repeat(2,1fr);
     }
+  }
+  @media (max-width:480px) {
+    .quick-actions {
+      grid-template-columns:1fr 1fr;
+    }
+  }
+
+  /* ── TELLER SUMMARY: responsive ── */
+  .teller-summary {
+    display:flex;
+    gap:1rem;
+    margin-bottom:1.5rem;
+  }
+  @media (max-width:480px) {
+    .teller-summary {
+      flex-direction:column;
+    }
+  }
+
+  /* ── HERO STATS: responsive ── */
+  .hero-stats {
+    display:flex;
+    gap:2rem;
+    flex-wrap:wrap;
+    justify-content:center;
+    margin-top:4rem;
+    padding-top:2rem;
+    border-top:1px solid rgba(200,169,110,.18);
+  }
+  @media (max-width:480px) {
+    .hero-stats {
+      gap:1.5rem;
+    }
+  }
+
+  /* ── HERO CTA BUTTONS: responsive ── */
+  .hero-ctas {
+    display:flex;
+    gap:1rem;
+    flex-wrap:wrap;
+    justify-content:center;
+    margin-top:3rem;
+  }
+  @media (max-width:480px) {
+    .hero-ctas {
+      flex-direction:column;
+      align-items:stretch;
+    }
+    .hero-ctas .btn-land-primary,
+    .hero-ctas .btn-land-secondary {
+      width:100%;
+      text-align:center;
+    }
+  }
+
+  /* ── FOOTER RESPONSIVE ── */
+  .footer-top {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:1.5rem;
+    margin-bottom:2rem;
+  }
+  .footer-links {
+    display:flex;
+    gap:2rem;
+    flex-wrap:wrap;
+  }
+  .footer-bottom {
+    border-top:1px solid rgba(200,169,110,.18);
+    padding-top:1.5rem;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:1rem;
+  }
+  @media (max-width:640px) {
+    .footer-top {
+      flex-direction:column;
+      align-items:flex-start;
+    }
+    .footer-links {
+      gap:1rem;
+    }
+    .footer-bottom {
+      flex-direction:column;
+      align-items:flex-start;
+    }
+  }
+
+  /* ── PAGE HEADER RESPONSIVE ── */
+  .page-header-inner {
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    margin-bottom:3rem;
+    flex-wrap:wrap;
+    gap:1rem;
+  }
+
+  /* ── INVOICE ROW RESPONSIVE ── */
+  .invoice-row {
+    display:flex;
+    align-items:center;
+    gap:1.5rem;
+    padding:1.25rem 1.5rem;
+    border-bottom:1px solid rgba(200,169,110,.18);
+    background:#1C2340;
+    transition:background .15s;
+    flex-wrap:wrap;
+  }
+  .invoice-row:hover { background:rgba(200,169,110,.10); }
+
+  /* ── RECEIPTS GRID: responsive ── */
+  .receipts-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+    gap:1rem;
+  }
+
+  /* ── FEATURES GRID: responsive ── */
+  .features-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:1.5rem;
+  }
+
+  /* ── BENEFITS GRID: responsive ── */
+  .benefits-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    gap:2rem;
+    margin-bottom:4rem;
+  }
+
+  /* ── TESTIMONIALS GRID: responsive ── */
+  .testi-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:1.5rem;
+  }
+
+  /* ── PRICING GRID: responsive ── */
+  .pricing-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:1.5rem;
+    align-items:start;
+  }
+
+  /* ── SIDEBAR NAV BUTTON ── */
+  .sidebar-btn {
+    width:100%;
+    background:transparent;
+    border:none;
+    border-left:2px solid transparent;
+    color:#5B6485;
+    font-family:'Space Mono',monospace;
+    font-size:.72rem;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    padding:.55rem .75rem;
+    display:flex;
+    align-items:center;
+    gap:.6rem;
+    cursor:pointer;
+    transition:all .2s;
+    text-align:left;
+  }
+  .sidebar-btn:hover { color:#F5F4F0; background:rgba(200,169,110,.05); }
+  .sidebar-btn.active { background:rgba(200,169,110,.10); border-left-color:#1AFFB2; color:#F5F4F0; }
+
+  /* ── TABLE RESPONSIVE ── */
+  .table-scroll { overflow-x:auto; }
+  .table-scroll table { min-width:500px; }
+
+  /* ── MODULE SYNC VISUAL RESPONSIVE ── */
+  .module-sync-row {
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:2rem;
+    margin:2rem 0;
+    position:relative;
   }
 `;
 
@@ -378,18 +757,18 @@ function Badge({ status }) {
     processed: { bg:T.electric10, color:T.electric, label:"PROCESSED" },
   };
   const s = m[status]||m.draft;
-  return <span style={{ background:s.bg, color:s.color, fontFamily:T.fontMono, fontSize:".58rem", letterSpacing:".1em", padding:".2rem .6rem" }}>{s.label}</span>;
+  return <span style={{ background:s.bg, color:s.color, fontFamily:T.fontMono, fontSize:".58rem", letterSpacing:".1em", padding:".2rem .6rem", whiteSpace:"nowrap" }}>{s.label}</span>;
 }
 
 // ─── Shared: Modal ────────────────────────────────────────────────────────────
 function Modal({ open, onClose, title, children, width=540 }) {
   if (!open) return null;
   return (
-    <div onClick={onClose} style={{ position:"fixed", inset:0, background:"rgba(10,15,30,.85)", backdropFilter:"blur(8px)", zIndex:1000, display:"flex", alignItems:"center", justifyContent:"center" }}>
-      <div onClick={e => e.stopPropagation()} style={{ background:T.mid, border:`1px solid ${T.border}`, width, maxWidth:"90vw", maxHeight:"85vh", overflowY:"auto", padding:"2.5rem" }}>
+    <div onClick={onClose} style={{ position:"fixed", inset:0, background:"rgba(10,15,30,.85)", backdropFilter:"blur(8px)", zIndex:1000, display:"flex", alignItems:"center", justifyContent:"center", padding:"1rem" }}>
+      <div onClick={e => e.stopPropagation()} style={{ background:T.mid, border:`1px solid ${T.border}`, width, maxWidth:"95vw", maxHeight:"90vh", overflowY:"auto", padding:"2.5rem" }}>
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"2rem" }}>
           <h2 style={{ fontFamily:T.fontDisplay, fontWeight:800, fontSize:"1.25rem", color:T.white, letterSpacing:"-.02em" }}>{title}</h2>
-          <button onClick={onClose} style={{ background:"none", border:"none", color:T.slate, cursor:"pointer", fontSize:"1.2rem" }}>✕</button>
+          <button onClick={onClose} style={{ background:"none", border:"none", color:T.slate, cursor:"pointer", fontSize:"1.2rem", lineHeight:1, padding:".25rem" }}>✕</button>
         </div>
         {children}
       </div>
@@ -400,12 +779,12 @@ function Modal({ open, onClose, title, children, width=540 }) {
 // ─── Shared: PageHeader ───────────────────────────────────────────────────────
 function PageHeader({ title, sub, action }) {
   return (
-    <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:"3rem", flexWrap:"wrap", gap:"1rem" }}>
+    <div className="page-header-inner">
       <div>
         <div style={{ fontFamily:T.fontMono, fontSize:".62rem", letterSpacing:".2em", color:T.electric, textTransform:"uppercase", marginBottom:".5rem" }}>— {title}</div>
         {sub && <p style={{ color:T.slate, fontSize:".88rem", fontFamily:T.fontBody }}>{sub}</p>}
       </div>
-      {action}
+      {action && <div style={{ flexShrink:0 }}>{action}</div>}
     </div>
   );
 }
@@ -436,7 +815,7 @@ function useScrollReveal() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// Interactive Demo Modal (unchanged)
+// Interactive Demo Modal
 // ═══════════════════════════════════════════════════════════════
 function InteractiveDemoModal({ open, onClose }) {
   const [step, setStep] = useState(0);
@@ -450,12 +829,12 @@ function InteractiveDemoModal({ open, onClose }) {
       demo: (
         <div style={{ background:T.ink, padding:"1rem", borderRadius:"0.5rem", textAlign:"center" }}>
           <div style={{ fontFamily:T.fontMono, fontSize:".7rem", color:T.slate, marginBottom:".5rem" }}>New Invoice</div>
-          <div style={{ background:T.mid, padding:"0.5rem", borderRadius:"0.25rem", marginBottom:"0.5rem" }}>
+          <div style={{ background:T.mid, padding:"0.5rem", borderRadius:"0.25rem", marginBottom:"0.5rem", fontSize:".85rem" }}>
             <div>Client: Acme Corp</div>
             <div>Amount: ₦250,000</div>
             <div style={{ color:T.gold }}>Status: Draft</div>
           </div>
-          <div className="btn-land-primary" style={{ padding:".3rem .6rem", fontSize:".7rem", display:"inline-block" }}>Send Invoice</div>
+          <button className="btn-land-primary" style={{ padding:".3rem .6rem", fontSize:".7rem" }}>Send Invoice</button>
         </div>
       ),
     },
@@ -466,14 +845,14 @@ function InteractiveDemoModal({ open, onClose }) {
       demo: (
         <div style={{ background:T.ink, padding:"1rem", borderRadius:"0.5rem", textAlign:"center" }}>
           <div style={{ fontFamily:T.fontMono, fontSize:".7rem", color:T.slate, marginBottom:".5rem" }}>Run Payroll</div>
-          <div style={{ display:"flex", justifyContent:"space-between", marginBottom:"0.5rem", fontSize:".7rem" }}>
+          <div style={{ display:"flex", justifyContent:"space-between", marginBottom:"0.5rem", fontSize:".8rem" }}>
             <span>Ada Okonkwo</span><span>₦350,000</span>
           </div>
-          <div style={{ display:"flex", justifyContent:"space-between", marginBottom:"0.5rem", fontSize:".7rem" }}>
+          <div style={{ display:"flex", justifyContent:"space-between", marginBottom:"0.5rem", fontSize:".8rem" }}>
             <span>Chidi Eze</span><span>₦420,000</span>
           </div>
-          <div style={{ borderTop:`1px solid ${T.border}`, marginTop:".5rem", paddingTop:".5rem", fontWeight:700 }}>Total: ₦770,000</div>
-          <div className="btn-land-primary" style={{ padding:".3rem .6rem", fontSize:".7rem", display:"inline-block", marginTop:".5rem" }}>Process Payroll</div>
+          <div style={{ borderTop:`1px solid ${T.border}`, marginTop:".5rem", paddingTop:".5rem", fontWeight:700, fontSize:".85rem" }}>Total: ₦770,000</div>
+          <button className="btn-land-primary" style={{ padding:".3rem .6rem", fontSize:".7rem", marginTop:".5rem" }}>Process Payroll</button>
         </div>
       ),
     },
@@ -484,11 +863,11 @@ function InteractiveDemoModal({ open, onClose }) {
       demo: (
         <div style={{ background:T.ink, padding:"1rem", borderRadius:"0.5rem", textAlign:"center" }}>
           <div style={{ fontFamily:T.fontMono, fontSize:".7rem", color:T.slate, marginBottom:".5rem" }}>Recent Receipt</div>
-          <div style={{ background:T.mid, padding:"0.5rem", borderRadius:"0.25rem" }}>
+          <div style={{ background:T.mid, padding:"0.5rem", borderRadius:"0.25rem", fontSize:".85rem" }}>
             <div>Merchant: ABC Supplies</div>
             <div>Amount: ₦45,000</div>
             <div>Category: Office Expenses</div>
-            <div className="btn-land-primary" style={{ padding:".2rem .5rem", fontSize:".6rem", display:"inline-block", marginTop:".5rem" }}>View File →</div>
+            <button className="btn-land-primary" style={{ padding:".2rem .5rem", fontSize:".6rem", marginTop:".5rem" }}>View File →</button>
           </div>
         </div>
       ),
@@ -500,14 +879,12 @@ function InteractiveDemoModal({ open, onClose }) {
       demo: (
         <div style={{ background:T.ink, padding:"1rem", borderRadius:"0.5rem", textAlign:"center" }}>
           <div style={{ fontFamily:T.fontMono, fontSize:".7rem", color:T.slate, marginBottom:".5rem" }}>Teller Entry</div>
-          <div style={{ background:T.mid, padding:"0.5rem", borderRadius:"0.25rem", marginBottom:"0.5rem" }}>
+          <div style={{ background:T.mid, padding:"0.5rem", borderRadius:"0.25rem", marginBottom:"0.5rem", fontSize:".85rem" }}>
             <div>Amount: ₦12,500</div>
             <div>Direction: ↑ Credit</div>
             <div>Note: Customer payment</div>
           </div>
-          <div style={{ display:"flex", gap:".5rem", justifyContent:"center" }}>
-            <div className="btn-land-primary" style={{ padding:".2rem .5rem", fontSize:".6rem", display:"inline-block" }}>Post Entry</div>
-          </div>
+          <button className="btn-land-primary" style={{ padding:".2rem .5rem", fontSize:".6rem" }}>Post Entry</button>
         </div>
       ),
     },
@@ -516,56 +893,26 @@ function InteractiveDemoModal({ open, onClose }) {
   const nextStep = () => {
     if (animating) return;
     setAnimating(true);
-    setTimeout(() => {
-      setStep((s) => (s + 1) % steps.length);
-      setAnimating(false);
-    }, 200);
+    setTimeout(() => { setStep((s) => (s + 1) % steps.length); setAnimating(false); }, 200);
   };
   const prevStep = () => {
     if (animating) return;
     setAnimating(true);
-    setTimeout(() => {
-      setStep((s) => (s - 1 + steps.length) % steps.length);
-      setAnimating(false);
-    }, 200);
+    setTimeout(() => { setStep((s) => (s - 1 + steps.length) % steps.length); setAnimating(false); }, 200);
   };
 
   if (!open) return null;
   return (
     <Modal open={open} onClose={onClose} title="See Finexa in Action" width={700}>
       <div style={{ textAlign:"center" }}>
-        <div style={{ display:"flex", justifyContent:"center", gap:"1rem", marginBottom:"1rem", flexWrap:"wrap" }}>
+        <div style={{ display:"flex", justifyContent:"center", gap:".75rem", marginBottom:"1.5rem", flexWrap:"wrap" }}>
           {steps.map((s, i) => (
-            <button
-              key={i}
-              onClick={() => { setStep(i); }}
-              style={{
-                background: step===i ? T.gold10 : "transparent",
-                border: `1px solid ${step===i ? T.gold : T.border}`,
-                color: step===i ? T.gold : T.slate,
-                fontFamily:T.fontMono,
-                fontSize:".7rem",
-                padding:".4rem .8rem",
-                cursor:"pointer",
-                borderRadius:"2rem",
-                transition:"all .2s",
-              }}
-            >
+            <button key={i} onClick={() => setStep(i)} style={{ background:step===i?T.gold10:"transparent", border:`1px solid ${step===i?T.gold:T.border}`, color:step===i?T.gold:T.slate, fontFamily:T.fontMono, fontSize:".7rem", padding:".4rem .8rem", cursor:"pointer", borderRadius:"2rem", transition:"all .2s" }}>
               {s.icon} {s.title}
             </button>
           ))}
         </div>
-        <div
-          key={step}
-          style={{
-            animation: animating ? "fadeUp 0.2s ease-out" : "bounceIn 0.4s cubic-bezier(0.16,1,0.3,1)",
-            background: T.mid,
-            border: `1px solid ${T.border}`,
-            borderRadius: "1rem",
-            padding: "2rem",
-            marginBottom: "2rem",
-          }}
-        >
+        <div key={step} style={{ animation:animating?"fadeUp 0.2s ease-out":"bounceIn 0.4s cubic-bezier(0.16,1,0.3,1)", background:T.ink, border:`1px solid ${T.border}`, borderRadius:"1rem", padding:"2rem", marginBottom:"2rem" }}>
           <div style={{ fontSize:"2rem", marginBottom:"1rem" }}>{steps[step].icon}</div>
           <h3 style={{ fontFamily:T.fontDisplay, fontWeight:800, fontSize:"1.4rem", color:T.white, marginBottom:".5rem" }}>{steps[step].title}</h3>
           <p style={{ color:T.slate, fontSize:".9rem", marginBottom:"1.5rem" }}>{steps[step].description}</p>
@@ -576,7 +923,8 @@ function InteractiveDemoModal({ open, onClose }) {
           <button onClick={nextStep} style={{ background:T.gold, border:"none", color:T.ink, padding:".5rem 1rem", borderRadius:"2rem", cursor:"pointer", fontWeight:700 }}>Next →</button>
         </div>
         <p style={{ color:T.slate, fontSize:".7rem", marginTop:"1.5rem" }}>
-          Click through to see how Finexa’s modules work. Ready to try it yourself? <button onClick={()=>{ onClose(); window.location.hash="/login"; }} style={{ background:"none", border:"none", color:T.gold, textDecoration:"underline", cursor:"pointer" }}>Sign up free</button>
+          Ready to try it yourself?{" "}
+          <button onClick={()=>{ onClose(); window.location.hash="/login"; }} style={{ background:"none", border:"none", color:T.gold, textDecoration:"underline", cursor:"pointer", fontFamily:T.fontMono, fontSize:".7rem" }}>Sign up free</button>
         </p>
       </div>
     </Modal>
@@ -584,36 +932,25 @@ function InteractiveDemoModal({ open, onClose }) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// Benefits Section (unchanged)
+// Benefits Section
 // ═══════════════════════════════════════════════════════════════
 function BenefitsSection({ navigate }) {
   const benefits = [
-    {
-      icon: "🔄",
-      title: "Seamless Sync",
-      description: "All modules talk to each other. Create an invoice → payment recorded in Teller → receipt auto‑attached. Payroll entries feed into general ledger automatically.",
-    },
-    {
-      icon: "⚡",
-      title: "Real‑time Updates",
-      description: "Live dashboard updates as transactions happen. Never miss a payment or deadline.",
-    },
-    {
-      icon: "🔒",
-      title: "Bank‑Grade Security",
-      description: "Row‑level security, encrypted data, and audit logs keep your financials safe.",
-    },
-    {
-      icon: "📊",
-      title: "Actionable Insights",
-      description: "Get instant reports on cash flow, outstanding invoices, and payroll costs.",
-    },
+    { icon:"🔄", title:"Seamless Sync", description:"All modules talk to each other. Create an invoice → payment recorded in Teller → receipt auto‑attached. Payroll entries feed into general ledger automatically." },
+    { icon:"⚡", title:"Real‑time Updates", description:"Live dashboard updates as transactions happen. Never miss a payment or deadline." },
+    { icon:"🔒", title:"Bank‑Grade Security", description:"Row‑level security, encrypted data, and audit logs keep your financials safe." },
+    { icon:"📊", title:"Actionable Insights", description:"Get instant reports on cash flow, outstanding invoices, and payroll costs." },
   ];
 
-  const modules = ["Invoicing", "Payroll", "Receipts", "Teller"];
+  const modules = [
+    { name:"Invoicing", icon:"◻" },
+    { name:"Payroll",   icon:"◈" },
+    { name:"Receipts",  icon:"◉" },
+    { name:"Teller",    icon:"⬡" },
+  ];
 
   return (
-    <section id="benefits" style={{ padding:"8rem 4rem", background:T.ink, position:"relative", zIndex:1 }}>
+    <section id="benefits" style={{ padding:"8rem 2rem", background:T.ink, position:"relative", zIndex:1 }}>
       <div style={{ maxWidth:1100, margin:"0 auto" }}>
         <div className="reveal" style={{ marginBottom:"4rem", textAlign:"center" }}>
           <div style={{ fontFamily:T.fontMono, fontSize:".62rem", color:T.electric, letterSpacing:".2em", textTransform:"uppercase", marginBottom:"1rem" }}>— Why Finexa</div>
@@ -622,33 +959,28 @@ function BenefitsSection({ navigate }) {
           </h2>
         </div>
 
-        {/* Benefits cards */}
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))", gap:"2rem", marginBottom:"4rem" }}>
+        <div className="benefits-grid">
           {benefits.map((b,i) => (
             <div key={b.title} className="benefit-card reveal" style={{ transitionDelay:`${i*.1}s` }}>
-              <div style={{ fontSize:"2rem", marginBottom:"1rem", color:T.gold }}>{b.icon}</div>
+              <div style={{ fontSize:"2rem", marginBottom:"1rem" }}>{b.icon}</div>
               <div style={{ fontFamily:T.fontDisplay, fontWeight:700, color:T.white, fontSize:"1.1rem", marginBottom:".6rem" }}>{b.title}</div>
               <div style={{ fontSize:".82rem", color:T.slate, lineHeight:1.75 }}>{b.description}</div>
             </div>
           ))}
         </div>
 
-        {/* Module sync visual */}
         <div className="reveal" style={{ background:T.mid, border:`1px solid ${T.border}`, borderRadius:"2rem", padding:"2rem", textAlign:"center" }}>
           <div style={{ fontFamily:T.fontMono, fontSize:".62rem", color:T.electric, letterSpacing:".1em", marginBottom:"1rem" }}>— How they work together</div>
           <h3 style={{ fontFamily:T.fontDisplay, fontWeight:700, fontSize:"1.4rem", color:T.white, marginBottom:"1rem" }}>One ecosystem, endless possibilities</h3>
-          <div style={{ display:"flex", flexWrap:"wrap", justifyContent:"center", gap:"2rem", margin:"2rem 0" }}>
+          <div className="module-sync-row">
             {modules.map((mod, idx) => (
-              <div key={mod} style={{ textAlign:"center", position:"relative" }}>
-                <div style={{ background:T.gold10, borderRadius:"50%", width:"60px", height:"60px", display:"flex", alignItems:"center", justifyContent:"center", marginBottom:".5rem", fontSize:"1.8rem" }}>
-                  {mod === "Invoicing" && "◻"}
-                  {mod === "Payroll" && "◈"}
-                  {mod === "Receipts" && "◉"}
-                  {mod === "Teller" && "⬡"}
+              <div key={mod.name} style={{ textAlign:"center", position:"relative", display:"flex", flexDirection:"column", alignItems:"center" }}>
+                <div style={{ background:T.gold10, border:`1px solid ${T.border}`, borderRadius:"50%", width:"60px", height:"60px", display:"flex", alignItems:"center", justifyContent:"center", marginBottom:".5rem", fontSize:"1.6rem" }}>
+                  {mod.icon}
                 </div>
-                <div style={{ fontFamily:T.fontMono, fontSize:".7rem", color:T.slate }}>{mod}</div>
-                {idx < modules.length-1 && (
-                  <div style={{ position:"absolute", top:"30px", right:"-30px", color:T.gold, fontSize:"1.2rem" }}>→</div>
+                <div style={{ fontFamily:T.fontMono, fontSize:".7rem", color:T.slate }}>{mod.name}</div>
+                {idx < modules.length - 1 && (
+                  <div style={{ position:"absolute", top:"28px", left:"calc(100% + .5rem)", color:T.gold, fontSize:"1rem", lineHeight:1, whiteSpace:"nowrap" }}>→</div>
                 )}
               </div>
             ))}
@@ -666,226 +998,61 @@ function BenefitsSection({ navigate }) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// How It Works Section (unchanged)
+// How It Works Section
 // ═══════════════════════════════════════════════════════════════
 function HowItWorksSection({ navigate, goLogin }) {
   const [step, setStep] = useState(0);
 
   const steps = [
-    {
-      number: "01",
-      title: "Create Account",
-      description: "Sign up free in under a minute. No credit card required. Your workspace is ready instantly.",
-      visual: "📝",
-      action: goLogin,
-      cta: "Sign Up Free",
-    },
-    {
-      number: "02",
-      title: "Set Up Your Org",
-      description: "Add your business name, logo, and team members in Settings. Get your team onboarded quickly.",
-      visual: "🏢",
-      action: () => navigate("/settings"),
-      cta: "Go to Settings",
-    },
-    {
-      number: "03",
-      title: "Add Employees",
-      description: "Import or manually add staff with salaries and bank details. Payroll starts here.",
-      visual: "👥",
-      action: () => navigate("/payroll"),
-      cta: "Open Payroll",
-    },
-    {
-      number: "04",
-      title: "Start Transacting",
-      description: "Create invoices, run payroll, upload receipts, and open your teller console.",
-      visual: "💰",
-      action: () => navigate("/dashboard"),
-      cta: "Open Dashboard",
-    },
+    { number:"01", title:"Create Account",    description:"Sign up free in under a minute. No credit card required. Your workspace is ready instantly.",          visual:"📝", action:goLogin,                   cta:"Sign Up Free"    },
+    { number:"02", title:"Set Up Your Org",   description:"Add your business name, logo, and team members in Settings. Get your team onboarded quickly.",         visual:"🏢", action:()=>navigate("/settings"),  cta:"Go to Settings"  },
+    { number:"03", title:"Add Employees",     description:"Import or manually add staff with salaries and bank details. Payroll starts here.",                     visual:"👥", action:()=>navigate("/payroll"),   cta:"Open Payroll"    },
+    { number:"04", title:"Start Transacting", description:"Create invoices, run payroll, upload receipts, and open your teller console.",                          visual:"💰", action:()=>navigate("/dashboard"), cta:"Open Dashboard"  },
   ];
 
   const nextStep = () => setStep((s) => (s + 1) % steps.length);
   const prevStep = () => setStep((s) => (s - 1 + steps.length) % steps.length);
 
   return (
-    <section id="how-it-works" style={{ padding: "8rem 4rem", background: T.mid, position: "relative", zIndex: 1 }}>
-      <div style={{ maxWidth: 1000, margin: "0 auto" }}>
-        <div className="reveal" style={{ marginBottom: "4rem" }}>
-          <div style={{ fontFamily: T.fontMono, fontSize: ".62rem", color: T.electric, letterSpacing: ".2em", textTransform: "uppercase", marginBottom: "1rem" }}>
-            — Getting Started
-          </div>
-          <h2 style={{ fontFamily: T.fontDisplay, fontWeight: 800, fontSize: "clamp(2rem,5vw,3.5rem)", color: T.white, letterSpacing: "-.03em" }}>
-            Up and running<br />in minutes
+    <section id="how-it-works" style={{ padding:"8rem 2rem", background:T.mid, position:"relative", zIndex:1 }}>
+      <div style={{ maxWidth:1000, margin:"0 auto" }}>
+        <div className="reveal" style={{ marginBottom:"4rem" }}>
+          <div style={{ fontFamily:T.fontMono, fontSize:".62rem", color:T.electric, letterSpacing:".2em", textTransform:"uppercase", marginBottom:"1rem" }}>— Getting Started</div>
+          <h2 style={{ fontFamily:T.fontDisplay, fontWeight:800, fontSize:"clamp(2rem,5vw,3.5rem)", color:T.white, letterSpacing:"-.03em" }}>
+            Up and running<br/>in minutes
           </h2>
         </div>
 
-        {/* Interactive Step Container */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "3rem",
-            background: T.ink,
-            border: `1px solid ${T.border}`,
-            borderRadius: "2rem",
-            padding: "3rem 2rem",
-            position: "relative",
-          }}
-        >
+        <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:"3rem", background:T.ink, border:`1px solid ${T.border}`, borderRadius:"2rem", padding:"3rem 2rem", position:"relative" }}>
           {/* Progress Dots */}
-          <div style={{ display: "flex", gap: ".75rem", marginBottom: "1rem" }}>
+          <div style={{ display:"flex", gap:".75rem" }}>
             {steps.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setStep(i)}
-                style={{
-                  width: "8px",
-                  height: "8px",
-                  borderRadius: "50%",
-                  background: i === step ? T.gold : T.slate,
-                  border: "none",
-                  cursor: "pointer",
-                  transition: "all 0.2s",
-                }}
-                aria-label={`Go to step ${i + 1}`}
-              />
+              <button key={i} onClick={() => setStep(i)} style={{ width:"8px", height:"8px", borderRadius:"50%", background:i===step?T.gold:T.slate, border:"none", cursor:"pointer", transition:"all 0.2s", padding:0 }} aria-label={`Go to step ${i + 1}`}/>
             ))}
           </div>
 
-          {/* Step Content with Animation */}
-          <div
-            key={step}
-            style={{
-              textAlign: "center",
-              animation: "fadeUp 0.5s cubic-bezier(0.16,1,0.3,1)",
-              width: "100%",
-            }}
-          >
-            <div
-              style={{
-                fontFamily: T.fontMono,
-                fontSize: "2.5rem",
-                fontWeight: 700,
-                color: T.gold25,
-                marginBottom: "1rem",
-                lineHeight: 1,
-                transform: "scale(1.1)",
-                transition: "transform 0.2s",
-              }}
-            >
-              {steps[step].number}
-            </div>
-            <div
-              style={{
-                fontSize: "4rem",
-                marginBottom: "1rem",
-                lineHeight: 1,
-                animation: "pulse 1s ease-in-out",
-              }}
-            >
-              {steps[step].visual}
-            </div>
-            <div
-              style={{
-                fontFamily: T.fontDisplay,
-                fontWeight: 700,
-                color: T.white,
-                fontSize: "1.8rem",
-                marginBottom: "1rem",
-              }}
-            >
-              {steps[step].title}
-            </div>
-            <p
-              style={{
-                fontSize: "1rem",
-                color: T.slate,
-                lineHeight: 1.6,
-                maxWidth: 480,
-                margin: "0 auto 2rem auto",
-              }}
-            >
-              {steps[step].description}
-            </p>
-            <button
-              onClick={steps[step].action}
-              style={{
-                background: "none",
-                border: `1px solid ${T.border}`,
-                color: T.gold,
-                fontFamily: T.fontMono,
-                fontSize: ".7rem",
-                letterSpacing: ".1em",
-                padding: ".6rem 1.2rem",
-                cursor: "pointer",
-                transition: "all 0.2s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = T.gold;
-                e.currentTarget.style.background = T.gold10;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = T.border;
-                e.currentTarget.style.background = "none";
-              }}
-            >
+          {/* Step Content */}
+          <div key={step} style={{ textAlign:"center", animation:"fadeUp 0.5s cubic-bezier(0.16,1,0.3,1)", width:"100%" }}>
+            <div style={{ fontFamily:T.fontMono, fontSize:"2.5rem", fontWeight:700, color:T.gold25, marginBottom:"1rem", lineHeight:1 }}>{steps[step].number}</div>
+            <div style={{ fontSize:"4rem", marginBottom:"1rem", lineHeight:1, animation:"pulse 1s ease-in-out" }}>{steps[step].visual}</div>
+            <div style={{ fontFamily:T.fontDisplay, fontWeight:700, color:T.white, fontSize:"1.8rem", marginBottom:"1rem" }}>{steps[step].title}</div>
+            <p style={{ fontSize:"1rem", color:T.slate, lineHeight:1.6, maxWidth:480, margin:"0 auto 2rem auto" }}>{steps[step].description}</p>
+            <button onClick={steps[step].action} style={{ background:"none", border:`1px solid ${T.border}`, color:T.gold, fontFamily:T.fontMono, fontSize:".7rem", letterSpacing:".1em", padding:".6rem 1.2rem", cursor:"pointer", transition:"all 0.2s" }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor=T.gold; e.currentTarget.style.background=T.gold10; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor=T.border; e.currentTarget.style.background="none"; }}>
               {steps[step].cta} →
             </button>
           </div>
 
-          {/* Navigation Arrows */}
-          <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
-            <button
-              onClick={prevStep}
-              style={{
-                background: T.mid,
-                border: `1px solid ${T.border}`,
-                color: T.white,
-                fontFamily: T.fontMono,
-                fontSize: ".8rem",
-                padding: ".5rem 1rem",
-                cursor: "pointer",
-                borderRadius: "2rem",
-                transition: "all 0.2s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = T.gold;
-                e.currentTarget.style.background = T.gold10;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = T.border;
-                e.currentTarget.style.background = T.mid;
-              }}
-            >
-              ← Previous
-            </button>
-            <button
-              onClick={nextStep}
-              style={{
-                background: T.mid,
-                border: `1px solid ${T.border}`,
-                color: T.white,
-                fontFamily: T.fontMono,
-                fontSize: ".8rem",
-                padding: ".5rem 1rem",
-                cursor: "pointer",
-                borderRadius: "2rem",
-                transition: "all 0.2s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = T.gold;
-                e.currentTarget.style.background = T.gold10;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = T.border;
-                e.currentTarget.style.background = T.mid;
-              }}
-            >
-              Next →
-            </button>
+          {/* Navigation */}
+          <div style={{ display:"flex", gap:"1rem" }}>
+            {[["← Previous", prevStep], ["Next →", nextStep]].map(([label, fn]) => (
+              <button key={label} onClick={fn} style={{ background:T.mid, border:`1px solid ${T.border}`, color:T.white, fontFamily:T.fontMono, fontSize:".8rem", padding:".5rem 1rem", cursor:"pointer", borderRadius:"2rem", transition:"all 0.2s" }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor=T.gold; e.currentTarget.style.background=T.gold10; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor=T.border; e.currentTarget.style.background=T.mid; }}>
+                {label}
+              </button>
+            ))}
           </div>
         </div>
       </div>
@@ -894,7 +1061,7 @@ function HowItWorksSection({ navigate, goLogin }) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// LANDING PAGE (responsive)
+// LANDING PAGE
 // ═══════════════════════════════════════════════════════════════
 function LandingPage() {
   const { navigate }  = useRouter();
@@ -905,14 +1072,12 @@ function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   useScrollReveal();
 
-  // Scroll listener for sticky nav
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 60);
     window.addEventListener("scroll", fn, { passive:true });
     return () => window.removeEventListener("scroll", fn);
   }, []);
 
-  // Floating particles
   useEffect(() => {
     const container = particlesRef.current;
     if (!container) return;
@@ -928,46 +1093,38 @@ function LandingPage() {
 
   const goLogin = () => navigate("/login");
 
-  // Helper for smooth scroll
   const scrollTo = (id) => {
     const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: "smooth" });
+    if (el) el.scrollIntoView({ behavior:"smooth" });
     setMobileMenuOpen(false);
   };
 
   return (
     <div style={{ background:T.ink, color:T.white, fontFamily:T.fontBody, overflowX:"hidden" }}>
 
-      {/* ── PARTICLES ── */}
       <div ref={particlesRef} style={{ position:"fixed", inset:0, pointerEvents:"none", zIndex:0, overflow:"hidden" }}/>
 
-      {/* ── NAV (responsive with hamburger) ── */}
+      {/* ── NAV ── */}
       <nav style={{ position:"fixed", top:0, left:0, right:0, zIndex:200, display:"flex", alignItems:"center", justifyContent:"space-between", padding:"1rem 2rem", background:scrolled?"rgba(10,15,30,.96)":"rgba(10,15,30,.55)", backdropFilter:"blur(20px)", borderBottom:scrolled?`1px solid ${T.border}`:"1px solid transparent", transition:"all .35s" }}>
         <a href="#/" style={{ display:"flex", alignItems:"center", gap:".65rem", textDecoration:"none" }}>
           <Logo size={26}/>
           <span style={{ fontFamily:T.fontDisplay, fontWeight:800, fontSize:"1.1rem", color:T.white, letterSpacing:"-.03em" }}>Fine<span style={{ color:T.gold }}>x</span>a</span>
         </a>
 
-        {/* Hamburger button */}
-        <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          style={{ background:"none", border:"none", color:T.white, fontSize:"1.5rem", cursor:"pointer", display:"block", zIndex:201 }}
-          className="hamburger"
-        >
-          ☰
+        {/* Hamburger: only shows on mobile via CSS */}
+        <button className="hamburger" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} style={{ background:"none", border:`1px solid ${T.border}`, color:T.white, fontSize:"1.1rem", cursor:"pointer", padding:".4rem .6rem", lineHeight:1, borderRadius:".25rem" }} aria-label="Toggle menu">
+          {mobileMenuOpen ? "✕" : "☰"}
         </button>
 
-        {/* Desktop & mobile menu */}
-        <div className={`nav-links ${mobileMenuOpen ? 'open' : ''}`} style={{ display:"flex", gap:"1.75rem", alignItems:"center" }}>
-          <button onClick={() => scrollTo("features")} className="nav-link-land" style={{ background: "none", border: "none", cursor: "pointer" }}>Features</button>
-          <button onClick={() => scrollTo("benefits")} className="nav-link-land" style={{ background: "none", border: "none", cursor: "pointer" }}>Benefits</button>
-          <button onClick={() => scrollTo("how-it-works")} className="nav-link-land" style={{ background: "none", border: "none", cursor: "pointer" }}>How It Works</button>
-          <button onClick={() => scrollTo("pricing")} className="nav-link-land" style={{ background: "none", border: "none", cursor: "pointer" }}>Pricing</button>
-          <button onClick={() => scrollTo("testimonials")} className="nav-link-land" style={{ background: "none", border: "none", cursor: "pointer" }}>Reviews</button>
+        {/* Nav links: shown on desktop, toggled on mobile */}
+        <div className={`nav-links${mobileMenuOpen ? " open" : ""}`}>
+          {[["Features","features"],["Benefits","benefits"],["How It Works","how-it-works"],["Pricing","pricing"],["Reviews","testimonials"]].map(([label,id]) => (
+            <button key={id} onClick={() => scrollTo(id)} className="nav-link-land">{label}</button>
+          ))}
           {session ? (
             <button onClick={() => navigate("/dashboard")} className="btn-land-primary" style={{ padding:".55rem 1.25rem", fontSize:".78rem" }}>Go to App →</button>
           ) : (
-            <div className="nav-actions" style={{ display:"flex", gap:".75rem" }}>
+            <div className="nav-actions">
               <button onClick={goLogin} className="btn-land-secondary" style={{ padding:".55rem 1.25rem", fontSize:".78rem" }}>Sign In</button>
               <button onClick={goLogin} className="btn-land-primary"   style={{ padding:".55rem 1.25rem", fontSize:".78rem" }}>Get Started Free</button>
             </div>
@@ -975,48 +1132,35 @@ function LandingPage() {
         </div>
       </nav>
 
-      {/* ── HERO (responsive) ── */}
+      {/* ── HERO ── */}
       <section style={{ minHeight:"100vh", display:"flex", flexDirection:"column", justifyContent:"center", padding:"6rem 2rem 4rem", position:"relative", overflow:"hidden" }}>
-        {/* Animated grid */}
         <div style={{ position:"absolute", inset:0, backgroundImage:`linear-gradient(rgba(200,169,110,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(200,169,110,.04) 1px,transparent 1px)`, backgroundSize:"60px 60px", animation:"gridDrift 20s linear infinite", pointerEvents:"none", zIndex:0 }}/>
-        {/* Orbs */}
         <div style={{ position:"absolute", top:"-15%", right:"-8%", width:"55vw", height:"55vw", maxWidth:650, borderRadius:"50%", background:"radial-gradient(ellipse,rgba(200,169,110,.11),transparent 70%)", animation:"pulse 6s ease-in-out infinite", pointerEvents:"none", zIndex:0 }}/>
         <div style={{ position:"absolute", bottom:"-20%", left:"-10%", width:"45vw", height:"45vw", maxWidth:500, borderRadius:"50%", background:"radial-gradient(ellipse,rgba(26,255,178,.07),transparent 70%)", animation:"pulse 8s ease-in-out infinite reverse", pointerEvents:"none", zIndex:0 }}/>
 
-        <div style={{ position:"relative", zIndex:1, maxWidth:940, margin:"0 auto", textAlign:"center" }}>
-          {/* Eyebrow */}
+        <div style={{ position:"relative", zIndex:1, maxWidth:940, margin:"0 auto", textAlign:"center", width:"100%" }}>
           <div style={{ fontFamily:T.fontMono, fontSize:".68rem", letterSpacing:".2em", color:T.electric, textTransform:"uppercase", marginBottom:"1.75rem", display:"flex", alignItems:"center", justifyContent:"center", gap:".75rem", opacity:0, animation:"fadeUp .8s .1s cubic-bezier(.16,1,.3,1) forwards" }}>
             <span style={{ display:"inline-block", width:"2rem", height:"1px", background:T.electric }}/>
             Payroll · Invoicing · Teller · Receipts
           </div>
 
-          {/* H1 */}
           <h1 style={{ fontFamily:T.fontDisplay, fontWeight:800, fontSize:"clamp(2.5rem,8vw,6rem)", lineHeight:1.05, letterSpacing:"-.04em", opacity:0, animation:"fadeUp .9s .22s cubic-bezier(.16,1,.3,1) forwards" }}>
             <span style={{ display:"block", color:T.white }}>Finance,</span>
             <span style={{ display:"block", background:`linear-gradient(135deg,${T.goldLt},${T.gold} 40%,${T.electric})`, WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text", backgroundSize:"200% 200%", animation:"gradShift 4s ease-in-out infinite 1.5s" }}>Engineered</span>
             <span style={{ display:"block", color:T.gold }}>for What's Next.</span>
           </h1>
 
-          {/* Sub */}
           <p style={{ marginTop:"2rem", maxWidth:"90%", marginLeft:"auto", marginRight:"auto", fontSize:"1rem", lineHeight:1.8, color:T.slate, fontWeight:400, opacity:0, animation:"fadeUp .8s .4s cubic-bezier(.16,1,.3,1) forwards" }}>
             <strong style={{ color:T.white, fontWeight:500 }}>Finexa</strong> is smart financial software that helps Nigerian businesses handle payments, payroll, invoices, and receipts — all in one place.
           </p>
 
-          {/* CTA buttons */}
-          <div style={{ display:"flex", gap:"1rem", flexWrap:"wrap", justifyContent:"center", marginTop:"3rem", opacity:0, animation:"fadeUp .9s .5s cubic-bezier(.16,1,.3,1) forwards" }}>
-            <button onClick={goLogin} className="btn-land-primary" style={{ fontSize:".9rem", padding:".9rem 2.25rem" }}>
-              Start Free Trial →
-            </button>
-            <button onClick={() => scrollTo("how-it-works")} className="btn-land-secondary" style={{ fontSize:".9rem", padding:".9rem 2.25rem" }}>
-              See How It Works
-            </button>
-            <button onClick={() => setDemoOpen(true)} className="btn-land-secondary" style={{ fontSize:".9rem", padding:".9rem 2.25rem" }}>
-              See Demo
-            </button>
+          <div className="hero-ctas" style={{ opacity:0, animation:"fadeUp .9s .5s cubic-bezier(.16,1,.3,1) forwards" }}>
+            <button onClick={goLogin} className="btn-land-primary" style={{ fontSize:".9rem", padding:".9rem 2.25rem" }}>Start Free Trial →</button>
+            <button onClick={() => scrollTo("how-it-works")} className="btn-land-secondary" style={{ fontSize:".9rem", padding:".9rem 2.25rem" }}>See How It Works</button>
+            <button onClick={() => setDemoOpen(true)} className="btn-land-secondary" style={{ fontSize:".9rem", padding:".9rem 2.25rem" }}>See Demo</button>
           </div>
 
-          {/* Stats */}
-          <div style={{ display:"flex", gap:"2rem", flexWrap:"wrap", justifyContent:"center", marginTop:"4rem", paddingTop:"2rem", borderTop:`1px solid ${T.border}`, opacity:0, animation:"fadeUp .9s .65s cubic-bezier(.16,1,.3,1) forwards" }}>
+          <div className="hero-stats" style={{ opacity:0, animation:"fadeUp .9s .65s cubic-bezier(.16,1,.3,1) forwards" }}>
             {[["₦2.4B+","Processed Monthly"],["28K+","Active Businesses"],["99.9%","Uptime SLA"],["1-Click","Payroll Run"]].map(([num,label]) => (
               <div key={label}>
                 <div style={{ fontFamily:T.fontDisplay, fontWeight:800, fontSize:"1.8rem", color:T.gold, letterSpacing:"-.03em" }}>{num}</div>
@@ -1026,9 +1170,7 @@ function LandingPage() {
           </div>
         </div>
 
-        {/* Scroll indicator */}
-        <div style={{ position:"absolute", bottom:"2rem", left:"50%", transform:"translateX(-50%)", display:"flex", flexDirection:"column", alignItems:"center", gap:".5rem", opacity:0, animation:"fadeIn 1s 1.5s forwards", cursor:"pointer", zIndex:1 }}
-          onClick={() => scrollTo("features")}>
+        <div style={{ position:"absolute", bottom:"2rem", left:"50%", transform:"translateX(-50%)", display:"flex", flexDirection:"column", alignItems:"center", gap:".5rem", opacity:0, animation:"fadeIn 1s 1.5s forwards", cursor:"pointer", zIndex:1 }} onClick={() => scrollTo("features")}>
           <div style={{ width:22, height:36, border:`1.5px solid ${T.border}`, borderRadius:11, display:"flex", justifyContent:"center", paddingTop:6 }}>
             <div style={{ width:3, height:8, background:T.gold, borderRadius:2, animation:"scrollBounce 1.6s ease-in-out infinite" }}/>
           </div>
@@ -1060,17 +1202,21 @@ function LandingPage() {
               Everything your finance<br/>team actually needs
             </h2>
           </div>
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))", gap:"1.5rem" }}>
+          <div className="features-grid">
             {[
-              { icon:"◻", title:"Invoicing",       desc:"Create and send professional invoices. Track status in real time — draft, sent, paid, or overdue.", href:"/invoices" },
-              { icon:"◈", title:"Payroll",          desc:"Add employees, set salaries, run payroll in one click. PAYE and pension auto-calculated.",          href:"/payroll"  },
-              { icon:"◉", title:"Receipts",         desc:"Upload or create receipts manually. Organise expenses, attach files, filter by category.",            href:"/receipts" },
-              { icon:"⬡", title:"Teller Console",   desc:"Record cash-in and cash-out with a numpad interface. Full daily ledger with session history.",       href:"/teller"   },
-              { icon:"▦", title:"Live Dashboard",   desc:"Real-time stats on transactions, invoices, and payroll. Powered by Supabase Realtime.",              href:"/dashboard"},
-              { icon:"◎", title:"Secure by Design", desc:"Row-level security on every table. Your data is only ever visible to your organisation.",            href:null        },
+              { icon:"◻", title:"Invoicing",       desc:"Create and send professional invoices. Track status in real time — draft, sent, paid, or overdue.", href:"/invoices"  },
+              { icon:"◈", title:"Payroll",          desc:"Add employees, set salaries, run payroll in one click. PAYE and pension auto-calculated.",          href:"/payroll"   },
+              { icon:"◉", title:"Receipts",         desc:"Upload or create receipts manually. Organise expenses, attach files, filter by category.",           href:"/receipts"  },
+              { icon:"⬡", title:"Teller Console",   desc:"Record cash-in and cash-out with a numpad interface. Full daily ledger with session history.",      href:"/teller"    },
+              { icon:"▦", title:"Live Dashboard",   desc:"Real-time stats on transactions, invoices, and payroll. Powered by Supabase Realtime.",             href:"/dashboard" },
+              { icon:"◎", title:"Secure by Design", desc:"Row-level security on every table. Your data is only ever visible to your organisation.",           href:null         },
             ].map((f,i) => (
-              <div key={f.title} className={`feat-card reveal`} style={{ animationDelay:`${i*.08}s`, transitionDelay:`${i*.08}s` }}
-                onClick={() => f.href && navigate(f.href)} style={{ cursor:f.href?"pointer":"default" }}>
+              <div
+                key={f.title}
+                className="feat-card reveal"
+                style={{ transitionDelay:`${i*.08}s`, cursor:f.href?"pointer":"default" }}
+                onClick={() => f.href && navigate(f.href)}
+              >
                 <div style={{ fontSize:"1.75rem", color:T.gold, marginBottom:"1rem" }}>{f.icon}</div>
                 <div style={{ fontFamily:T.fontDisplay, fontWeight:700, color:T.white, fontSize:"1rem", marginBottom:".6rem" }}>{f.title}</div>
                 <div style={{ fontSize:".82rem", color:T.slate, lineHeight:1.75 }}>{f.desc}</div>
@@ -1094,11 +1240,11 @@ function LandingPage() {
             <div style={{ fontFamily:T.fontMono, fontSize:".62rem", color:T.electric, letterSpacing:".2em", textTransform:"uppercase", marginBottom:"1rem" }}>— Trusted By</div>
             <h2 style={{ fontFamily:T.fontDisplay, fontWeight:800, fontSize:"clamp(1.8rem,5vw,3rem)", color:T.white, letterSpacing:"-.03em" }}>What our customers say</h2>
           </div>
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))", gap:"1.5rem" }}>
+          <div className="testi-grid">
             {[
-              { q:"Payroll used to take us 3 days. With Finexa it's done before lunch.",              name:"Ada Okonkwo",    role:"CFO, Acme Corp Lagos"         },
-              { q:"The teller console is exactly what our branch staff needed. Simple and fast.",      name:"Chidi Eze",      role:"Operations Lead, Starfield Finance" },
-              { q:"Finally a fintech tool built for how Nigerian businesses actually work.",           name:"Ngozi Adeyemi",  role:"Founder, Blue Horizon Ltd"    },
+              { q:"Payroll used to take us 3 days. With Finexa it's done before lunch.",           name:"Ada Okonkwo",   role:"CFO, Acme Corp Lagos"             },
+              { q:"The teller console is exactly what our branch staff needed. Simple and fast.",   name:"Chidi Eze",     role:"Operations Lead, Starfield Finance" },
+              { q:"Finally a fintech tool built for how Nigerian businesses actually work.",        name:"Ngozi Adeyemi", role:"Founder, Blue Horizon Ltd"          },
             ].map((t,i) => (
               <div key={t.name} className="testi-card reveal" style={{ transitionDelay:`${i*.1}s` }}>
                 <div style={{ fontSize:"2rem", color:T.gold, marginBottom:"1rem", lineHeight:1 }}>"</div>
@@ -1118,26 +1264,28 @@ function LandingPage() {
             <div style={{ fontFamily:T.fontMono, fontSize:".62rem", color:T.electric, letterSpacing:".2em", textTransform:"uppercase", marginBottom:"1rem" }}>— Pricing</div>
             <h2 style={{ fontFamily:T.fontDisplay, fontWeight:800, fontSize:"clamp(1.8rem,5vw,3rem)", color:T.white, letterSpacing:"-.03em" }}>Simple, transparent pricing</h2>
           </div>
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))", gap:"1.5rem" }}>
+          <div className="pricing-grid">
             {[
-              { name:"Starter", price:"Free", period:"forever", features:["Up to 3 employees","10 invoices/month","Basic receipts","Teller console","Email support"], cta:"Get Started", featured:false },
-              { name:"Growth",  price:"₦15,000", period:"/month", features:["Unlimited employees","Unlimited invoices","Receipt storage 10GB","Payroll automation","Priority support","PDF exports"], cta:"Start Free Trial", featured:true },
-              { name:"Enterprise", price:"Custom", period:"", features:["Multi-branch support","Custom integrations","Dedicated account manager","SLA guarantee","On-premise option"], cta:"Contact Sales", featured:false },
+              { name:"Starter",    price:"Free",     period:"forever",  features:["Up to 3 employees","10 invoices/month","Basic receipts","Teller console","Email support"],                                           cta:"Get Started",   featured:false },
+              { name:"Growth",     price:"₦15,000",  period:"/month",   features:["Unlimited employees","Unlimited invoices","Receipt storage 10GB","Payroll automation","Priority support","PDF exports"],            cta:"Start Free Trial", featured:true  },
+              { name:"Enterprise", price:"Custom",   period:"",         features:["Multi-branch support","Custom integrations","Dedicated account manager","SLA guarantee","On-premise option"],                       cta:"Contact Sales", featured:false },
             ].map((p,i) => (
-              <div key={p.name} className={`price-card reveal ${p.featured?"featured":""}`} style={{ transitionDelay:`${i*.1}s` }}>
-                <div style={{ fontFamily:T.fontMono, fontSize:".65rem", color:p.featured?T.electric:T.slate, letterSpacing:".12em", textTransform:"uppercase", marginBottom:".75rem" }}>{p.name}</div>
+              <div key={p.name} className={`price-card reveal${p.featured?" featured":""}`} style={{ transitionDelay:`${i*.1}s` }}>
+                {p.featured && <div style={{ fontFamily:T.fontMono, fontSize:".58rem", color:T.electric, letterSpacing:".15em", textTransform:"uppercase", marginBottom:".75rem", background:T.electric10, display:"inline-block", padding:".2rem .6rem" }}>Most Popular</div>}
+                <div style={{ fontFamily:T.fontMono, fontSize:".65rem", color:p.featured?T.electric:T.slate, letterSpacing:".12em", textTransform:"uppercase", marginBottom:".75rem", marginTop:p.featured?".5rem":0 }}>{p.name}</div>
                 <div style={{ fontFamily:T.fontDisplay, fontWeight:800, fontSize:"2.2rem", color:T.white, letterSpacing:"-.03em", marginBottom:".25rem" }}>{p.price}</div>
                 <div style={{ fontFamily:T.fontMono, fontSize:".68rem", color:T.slate, marginBottom:"2rem" }}>{p.period}</div>
-                <div style={{ display:"flex", flexDirection:"column", gap:".65rem", marginBottom:"2rem" }}>
+                <div style={{ display:"flex", flexDirection:"column", gap:".65rem", marginBottom:"2rem", flex:1 }}>
                   {p.features.map(f => (
                     <div key={f} style={{ display:"flex", alignItems:"center", gap:".6rem", fontSize:".82rem", color:T.white80 }}>
-                      <span style={{ color:p.featured?T.electric:T.gold, fontSize:".7rem" }}>✓</span> {f}
+                      <span style={{ color:p.featured?T.electric:T.gold, fontSize:".7rem", flexShrink:0 }}>✓</span> {f}
                     </div>
                   ))}
                 </div>
-                <button onClick={p.name==="Enterprise" ? ()=>window.location.href="mailto:hello@finexa.ng" : goLogin}
+                <button
+                  onClick={p.name==="Enterprise" ? ()=>window.location.href="mailto:hello@finexa.ng" : goLogin}
                   className={p.featured?"btn-land-primary":"btn-land-secondary"}
-                  style={{ width:"100%", padding:".85rem", fontSize:".82rem" }}>
+                  style={{ width:"100%", padding:".85rem", fontSize:".82rem", justifyContent:"center" }}>
                   {p.cta}
                 </button>
               </div>
@@ -1159,38 +1307,24 @@ function LandingPage() {
             Fast, reliable financial tools built for your business.
           </p>
           <div style={{ display:"flex", gap:"1rem", justifyContent:"center", flexWrap:"wrap" }}>
-            <button onClick={goLogin} className="btn-land-primary" style={{ fontSize:"1rem", padding:"1rem 2rem" }}>
-              Create Free Account →
-            </button>
-            <button onClick={() => scrollTo("features")} className="btn-land-secondary" style={{ fontSize:"1rem", padding:"1rem 2rem" }}>
-              Learn More
-            </button>
+            <button onClick={goLogin} className="btn-land-primary" style={{ fontSize:"1rem", padding:"1rem 2rem" }}>Create Free Account →</button>
+            <button onClick={() => scrollTo("features")} className="btn-land-secondary" style={{ fontSize:"1rem", padding:"1rem 2rem" }}>Learn More</button>
           </div>
         </div>
       </section>
 
-      {/* ── FOOTER (responsive) ── */}
+      {/* ── FOOTER ── */}
       <footer style={{ background:T.mid, borderTop:`1px solid ${T.border}`, padding:"3rem 2rem", zIndex:1, position:"relative" }}>
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:"1.5rem", marginBottom:"2rem" }}>
+        <div className="footer-top">
           <div style={{ display:"flex", alignItems:"center", gap:".65rem" }}>
             <Logo size={22}/>
             <span style={{ fontFamily:T.fontDisplay, fontWeight:800, fontSize:"1rem", color:T.white }}>Fine<span style={{ color:T.gold }}>x</span>a</span>
           </div>
-          <div style={{ display:"flex", gap:"2rem", flexWrap:"wrap" }}>
-            {[
-              ["Features", "features"],
-              ["Benefits", "benefits"],
-              ["How It Works", "how-it-works"],
-              ["Pricing", "pricing"],
-              ["Reviews", "testimonials"]
-            ].map(([label, id]) => (
-              <button
-                key={label}
-                onClick={() => scrollTo(id)}
-                style={{ fontFamily: T.fontMono, fontSize: ".62rem", color: T.slate, letterSpacing: ".08em", textDecoration: "none", transition: "color .2s", textTransform: "uppercase", background: "none", border: "none", cursor: "pointer" }}
-                onMouseEnter={e => e.currentTarget.style.color = T.gold}
-                onMouseLeave={e => e.currentTarget.style.color = T.slate}
-              >
+          <div className="footer-links">
+            {[["Features","features"],["Benefits","benefits"],["How It Works","how-it-works"],["Pricing","pricing"],["Reviews","testimonials"]].map(([label,id]) => (
+              <button key={label} onClick={() => scrollTo(id)} style={{ fontFamily:T.fontMono, fontSize:".62rem", color:T.slate, letterSpacing:".08em", textDecoration:"none", transition:"color .2s", textTransform:"uppercase", background:"none", border:"none", cursor:"pointer", padding:0 }}
+                onMouseEnter={e => e.currentTarget.style.color=T.gold}
+                onMouseLeave={e => e.currentTarget.style.color=T.slate}>
                 {label}
               </button>
             ))}
@@ -1200,7 +1334,7 @@ function LandingPage() {
             <button onClick={goLogin} className="btn-land-primary"   style={{ fontSize:".72rem", padding:".4rem .9rem" }}>Get Started</button>
           </div>
         </div>
-        <div style={{ borderTop:`1px solid ${T.border}`, paddingTop:"1.5rem", display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:"1rem" }}>
+        <div className="footer-bottom">
           <div style={{ fontFamily:T.fontMono, fontSize:".6rem", color:T.slate }}>© {new Date().getFullYear()} Finexa. Finance, Engineered for What's Next.</div>
           <div style={{ display:"flex", gap:"1.25rem" }}>
             {["Privacy","Terms","Support"].map(l => (
@@ -1212,14 +1346,13 @@ function LandingPage() {
         </div>
       </footer>
 
-      {/* Interactive Demo Modal */}
       <InteractiveDemoModal open={demoOpen} onClose={() => setDemoOpen(false)} />
     </div>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════
-// LOGIN PAGE (unchanged)
+// LOGIN PAGE
 // ═══════════════════════════════════════════════════════════════
 function LoginPage() {
   const { signIn, signUp } = useAuth();
@@ -1298,7 +1431,7 @@ function LoginPage() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// APP SHELL — Sidebar + PageShell (responsive)
+// APP SHELL — Sidebar + PageShell
 // ═══════════════════════════════════════════════════════════════
 const NAV_ITEMS = [
   { label:"Dashboard", href:"/dashboard", icon:"▦" },
@@ -1325,11 +1458,17 @@ function Sidebar() {
 
   return (
     <>
-      {/* Toggle button for mobile */}
-      <button className="sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
-        ☰
+      {/* Toggle button — CSS hides it on desktop */}
+      <button className="sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="Toggle sidebar">
+        {sidebarOpen ? "✕" : "☰"}
       </button>
-      <nav className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
+
+      {/* Backdrop — only renders on mobile when open */}
+      {sidebarOpen && (
+        <div className="sidebar-backdrop" onClick={closeSidebar}/>
+      )}
+
+      <nav className={`sidebar${sidebarOpen ? " open" : ""}`}>
         <button onClick={() => { navigate("/dashboard"); closeSidebar(); }} style={{ display:"flex", alignItems:"center", gap:".65rem", background:"none", border:"none", cursor:"pointer", marginBottom:"3rem", padding:0 }}>
           <Logo size={28}/>
           <span style={{ fontFamily:T.fontDisplay, fontWeight:800, fontSize:"1.15rem", letterSpacing:"-.03em", color:T.white }}>Fine<span style={{ color:T.gold }}>x</span>a</span>
@@ -1340,7 +1479,9 @@ function Sidebar() {
             const active = path === href || path.startsWith(href+"/");
             return (
               <li key={href}>
-                <button className="sidebar-btn" onClick={() => { navigate(href); closeSidebar(); }} style={{ width:"100%", background:active?T.gold10:"transparent", border:"none", borderLeft:`2px solid ${active?T.electric:"transparent"}`, color:active?T.white:T.slate, fontFamily:T.fontMono, fontSize:".72rem", letterSpacing:".08em", textTransform:"uppercase", padding:".55rem .75rem", display:"flex", alignItems:"center", gap:".6rem", cursor:"pointer", transition:"all .2s", textAlign:"left" }}>
+                <button
+                  className={`sidebar-btn${active?" active":""}`}
+                  onClick={() => { navigate(href); closeSidebar(); }}>
                   <span style={{ fontSize:"1rem", lineHeight:1 }}>{icon}</span>{label}
                 </button>
               </li>
@@ -1371,7 +1512,7 @@ function PageShell({ children }) {
   return (
     <div style={{ minHeight:"100vh", background:T.ink }}>
       <Sidebar/>
-      <main className="main-content" style={{ padding:"3rem 3.5rem", minHeight:"100vh", transition:"padding 0.3s" }}>
+      <main className="main-content">
         {children}
       </main>
     </div>
@@ -1379,10 +1520,10 @@ function PageShell({ children }) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// DASHBOARD (responsive)
+// DASHBOARD
 // ═══════════════════════════════════════════════════════════════
 function DashboardPage() {
-  const { supabase, profile } = useAuth();
+  const { supabase } = useAuth();
   const { navigate } = useRouter();
   const [stats, setStats] = useState({ invoices:0, payroll:0, receipts:0, transactions:0 });
 
@@ -1399,7 +1540,8 @@ function DashboardPage() {
   return (
     <PageShell>
       <PageHeader title="Dashboard" sub={new Date().toLocaleDateString("en-NG",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}/>
-      <div className="stats-grid" style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))", gap:"1.25rem", marginBottom:"3rem" }}>
+
+      <div className="stats-grid">
         {[
           { label:"Total Invoices",  value:stats.invoices,     delta:12,  accent:T.gold,     href:"/invoices"  },
           { label:"Payroll Runs",    value:stats.payroll,      delta:0,   accent:T.white,    href:"/payroll"   },
@@ -1416,13 +1558,12 @@ function DashboardPage() {
         ))}
       </div>
 
-      {/* Quick actions */}
-      <div className="quick-actions" style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))", gap:"1rem", marginBottom:"3rem" }}>
+      <div className="quick-actions">
         {[
-          { label:"New Invoice",    icon:"◻", href:"/invoices"  },
-          { label:"Run Payroll",    icon:"◈", href:"/payroll"   },
-          { label:"New Receipt",    icon:"◉", href:"/receipts"  },
-          { label:"Open Teller",    icon:"⬡", href:"/teller"    },
+          { label:"New Invoice", icon:"◻", href:"/invoices"  },
+          { label:"Run Payroll", icon:"◈", href:"/payroll"   },
+          { label:"New Receipt", icon:"◉", href:"/receipts"  },
+          { label:"Open Teller", icon:"⬡", href:"/teller"    },
         ].map(a => (
           <button key={a.label} onClick={() => navigate(a.href)} style={{ background:T.gold10, border:`1px solid ${T.border}`, color:T.white, fontFamily:T.fontDisplay, fontWeight:600, fontSize:".82rem", padding:"1rem", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:".75rem", transition:"all .2s" }}
             onMouseEnter={e => { e.currentTarget.style.borderColor=T.gold; e.currentTarget.style.background=T.gold18; }}
@@ -1452,11 +1593,13 @@ function RecentTransactions({ supabase }) {
 
   if (!rows.length) return <EmptyState icon="◈" title="No transactions yet" sub="They'll appear here once recorded." compact/>;
   return (
-    <div style={{ overflowX:"auto" }}>
+    <div className="table-scroll">
       <table style={{ width:"100%", borderCollapse:"collapse", minWidth:"500px" }}>
         <thead>
           <tr>
-            {["Reference","Type","Amount","Date"].map(h => <th key={h} style={{ fontFamily:T.fontMono, fontSize:".6rem", color:T.slate, letterSpacing:".1em", textTransform:"uppercase", textAlign:"left", paddingBottom:".75rem", borderBottom:`1px solid ${T.border}` }}>{h}</th>)}
+            {["Reference","Type","Amount","Date"].map(h => (
+              <th key={h} style={{ fontFamily:T.fontMono, fontSize:".6rem", color:T.slate, letterSpacing:".1em", textTransform:"uppercase", textAlign:"left", paddingBottom:".75rem", borderBottom:`1px solid ${T.border}` }}>{h}</th>
+            ))}
           </tr>
         </thead>
         <tbody>
@@ -1475,26 +1618,6 @@ function RecentTransactions({ supabase }) {
     </div>
   );
 }
-
-// ═══════════════════════════════════════════════════════════════
-// INVOICES, PAYROLL, RECEIPTS, TELLER, SETTINGS (unchanged)
-// ... (keep the rest of the components as in previous correct version)
-// For brevity, I'm omitting them here, but they remain identical to the previous fully working version.
-// In the final answer, I'll include the full file.
-// ═══════════════════════════════════════════════════════════════
-
-// (All other components (InvoicesPage, PayrollPage, ReceiptsPage, TellerPage, SettingsPage)
-// remain exactly as in the previous working version. They are already responsive via the global CSS and layout changes.)
-
-// ═══════════════════════════════════════════════════════════════
-// ROOT APP + ROUTES (unchanged)
-// ═══════════════════════════════════════════════════════════════
-
-// =================================================================
-// The remaining components (InvoicesPage, PayrollPage, ReceiptsPage, TellerPage, SettingsPage)
-// are exactly as in the previous correct version. They are fully compatible with the responsive layout.
-// For the sake of completeness, they are included in the final file below.
-// =================================================================
 
 // ═══════════════════════════════════════════════════════════════
 // INVOICES
@@ -1543,19 +1666,17 @@ function InvoicesPage() {
       ) : (
         <div style={{ display:"flex", flexDirection:"column", border:`1px solid ${T.border}` }}>
           {invoices.map(inv => (
-            <div key={inv.id} style={{ display:"flex", alignItems:"center", gap:"1.5rem", padding:"1.25rem 1.5rem", borderBottom:`1px solid ${T.border}`, background:T.mid, transition:"background .15s" }}
-              onMouseEnter={e => e.currentTarget.style.background=T.gold10}
-              onMouseLeave={e => e.currentTarget.style.background=T.mid}>
-              <div style={{ flex:1 }}>
-                <div style={{ fontFamily:T.fontDisplay, fontWeight:700, color:T.white, fontSize:".95rem" }}>{inv.client_name}</div>
+            <div key={inv.id} className="invoice-row">
+              <div style={{ flex:1, minWidth:0 }}>
+                <div style={{ fontFamily:T.fontDisplay, fontWeight:700, color:T.white, fontSize:".95rem", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{inv.client_name}</div>
                 <div style={{ fontFamily:T.fontMono, fontSize:".63rem", color:T.slate, marginTop:".2rem" }}>
                   INV-{inv.id.slice(0,8).toUpperCase()} · Due {inv.due_date?new Date(inv.due_date).toLocaleDateString("en-NG"):"—"}
                 </div>
               </div>
-              <div style={{ fontFamily:T.fontDisplay, fontWeight:800, color:T.gold, fontSize:"1.1rem" }}>₦{Number(inv.total_ngn||0).toLocaleString("en-NG",{minimumFractionDigits:2})}</div>
+              <div style={{ fontFamily:T.fontDisplay, fontWeight:800, color:T.gold, fontSize:"1.1rem", flexShrink:0 }}>₦{Number(inv.total_ngn||0).toLocaleString("en-NG",{minimumFractionDigits:2})}</div>
               <Badge status={inv.status||"draft"}/>
-              {inv.status!=="paid" && <Btn variant="ghost" onClick={()=>markPaid(inv.id)} style={{ fontSize:".65rem", padding:".35rem .75rem", color:T.electric, border:`1px solid ${T.electric10}` }}>Mark Paid</Btn>}
-              <Btn variant="danger" onClick={()=>deleteInvoice(inv.id)} style={{ padding:".35rem .75rem", fontSize:".65rem" }}>Delete</Btn>
+              {inv.status!=="paid" && <Btn variant="ghost" onClick={()=>markPaid(inv.id)} style={{ fontSize:".65rem", padding:".35rem .75rem", color:T.electric, border:`1px solid ${T.electric10}`, flexShrink:0 }}>Mark Paid</Btn>}
+              <Btn variant="danger" onClick={()=>deleteInvoice(inv.id)} style={{ padding:".35rem .75rem", fontSize:".65rem", flexShrink:0 }}>Delete</Btn>
             </div>
           ))}
         </div>
@@ -1637,23 +1758,24 @@ function PayrollPage() {
   return (
     <PageShell>
       <PageHeader title="Payroll" sub="Manage employees and run payroll" action={
-        <div style={{ display:"flex", gap:".75rem" }}>
+        <div style={{ display:"flex", gap:".75rem", flexWrap:"wrap" }}>
           <Btn variant="secondary" onClick={()=>setShowEmpForm(true)}>+ Employee</Btn>
           <Btn onClick={runPayroll} disabled={!employees.length}>Run Payroll</Btn>
         </div>
       }/>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"2rem" }}>
+      {/* FIX: was hardcoded "1fr 1fr", now uses responsive class */}
+      <div className="payroll-grid">
         <div>
           <div style={{ fontFamily:T.fontMono, fontSize:".62rem", color:T.slate, letterSpacing:".12em", textTransform:"uppercase", marginBottom:"1rem" }}>Employees ({employees.length})</div>
           <div style={{ display:"flex", flexDirection:"column", gap:".5rem" }}>
             {employees.length===0 && <EmptyState icon="◈" title="No employees" sub="Add your first employee." compact/>}
             {employees.map(e => (
-              <div key={e.id} style={{ background:T.mid, border:`1px solid ${T.border}`, padding:"1rem 1.25rem", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                <div>
-                  <div style={{ fontFamily:T.fontDisplay, fontWeight:600, color:T.white, fontSize:".9rem" }}>{e.full_name}</div>
+              <div key={e.id} style={{ background:T.mid, border:`1px solid ${T.border}`, padding:"1rem 1.25rem", display:"flex", justifyContent:"space-between", alignItems:"center", gap:"1rem" }}>
+                <div style={{ minWidth:0 }}>
+                  <div style={{ fontFamily:T.fontDisplay, fontWeight:600, color:T.white, fontSize:".9rem", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{e.full_name}</div>
                   <div style={{ fontFamily:T.fontMono, fontSize:".62rem", color:T.slate, marginTop:".15rem" }}>{e.role||"Staff"}</div>
                 </div>
-                <div style={{ fontFamily:T.fontMono, color:T.gold, fontSize:".85rem" }}>₦{Number(e.salary_ngn||0).toLocaleString()}/mo</div>
+                <div style={{ fontFamily:T.fontMono, color:T.gold, fontSize:".85rem", flexShrink:0 }}>₦{Number(e.salary_ngn||0).toLocaleString()}/mo</div>
               </div>
             ))}
           </div>
@@ -1663,12 +1785,12 @@ function PayrollPage() {
           <div style={{ display:"flex", flexDirection:"column", gap:".5rem" }}>
             {runs.length===0 && <EmptyState icon="◈" title="No runs yet" sub="Process your first payroll." compact/>}
             {runs.map(r => (
-              <div key={r.id} style={{ background:T.mid, border:`1px solid ${T.border}`, padding:"1rem 1.25rem", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+              <div key={r.id} style={{ background:T.mid, border:`1px solid ${T.border}`, padding:"1rem 1.25rem", display:"flex", justifyContent:"space-between", alignItems:"center", gap:"1rem" }}>
                 <div>
                   <div style={{ fontFamily:T.fontMono, fontSize:".7rem", color:T.white }}>{r.period_start} → {r.period_end}</div>
                   <div style={{ marginTop:".3rem" }}><Badge status={r.status||"processed"}/></div>
                 </div>
-                <div style={{ fontFamily:T.fontDisplay, fontWeight:700, color:T.electric }}>₦{Number(r.total||0).toLocaleString()}</div>
+                <div style={{ fontFamily:T.fontDisplay, fontWeight:700, color:T.electric, flexShrink:0 }}>₦{Number(r.total||0).toLocaleString()}</div>
               </div>
             ))}
           </div>
@@ -1711,7 +1833,7 @@ function EmployeeFormModal({ open, onClose, onSaved, supabase }) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// RECEIPTS (enhanced: manual creation + upload)
+// RECEIPTS
 // ═══════════════════════════════════════════════════════════════
 function ReceiptsPage() {
   const { supabase } = useAuth();
@@ -1745,16 +1867,16 @@ function ReceiptsPage() {
   return (
     <PageShell>
       <PageHeader title="Receipts" sub="Upload or manually create receipts" action={
-        <div style={{ display:"flex", gap:"1rem" }}>
+        <div style={{ display:"flex", gap:"1rem", flexWrap:"wrap" }}>
           <Btn onClick={()=>setShowForm(true)}>+ New Receipt</Btn>
-          <label style={{ background:T.gold, color:T.ink, fontFamily:T.fontDisplay, fontWeight:700, fontSize:".82rem", letterSpacing:".05em", padding:".75rem 1.5rem", cursor:"pointer" }}>
+          <label style={{ background:T.gold, color:T.ink, fontFamily:T.fontDisplay, fontWeight:700, fontSize:".82rem", letterSpacing:".05em", padding:".75rem 1.5rem", cursor:"pointer", display:"inline-flex", alignItems:"center" }}>
             {uploading?"Uploading…":"+ Upload Receipt"}
             <input type="file" accept="image/*,application/pdf" onChange={handleUpload} style={{ display:"none" }}/>
           </label>
         </div>
       }/>
       {receipts.length===0 ? <EmptyState icon="◉" title="No receipts" sub="Create your first receipt above."/> : (
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))", gap:"1rem" }}>
+        <div className="receipts-grid">
           {receipts.map(r => (
             <div key={r.id} style={{ background:T.mid, border:`1px solid ${T.border}`, padding:"1.5rem", transition:"border-color .2s" }}
               onMouseEnter={e => e.currentTarget.style.borderColor=T.gold50}
@@ -1762,6 +1884,7 @@ function ReceiptsPage() {
               <div style={{ fontFamily:T.fontMono, fontSize:".62rem", color:T.slate, letterSpacing:".08em", textTransform:"uppercase", marginBottom:".5rem" }}>{r.date}</div>
               <div style={{ fontFamily:T.fontDisplay, fontWeight:700, color:T.white, fontSize:".95rem", marginBottom:".4rem" }}>{r.merchant}</div>
               <div style={{ fontFamily:T.fontDisplay, fontWeight:800, color:T.gold, fontSize:"1.2rem" }}>₦{Number(r.amount||0).toLocaleString("en-NG",{minimumFractionDigits:2})}</div>
+              {r.category && <div style={{ fontFamily:T.fontMono, fontSize:".62rem", color:T.slate, marginTop:".4rem" }}>{r.category}</div>}
               {r.storage_path && (
                 <a href={supabase.storage.from("receipts").getPublicUrl(r.storage_path).data.publicUrl} target="_blank" rel="noreferrer"
                   style={{ display:"inline-block", marginTop:"1rem", fontFamily:T.fontMono, fontSize:".62rem", color:T.electric, textDecoration:"none", letterSpacing:".06em" }}>
@@ -1787,13 +1910,7 @@ function ReceiptFormModal({ open, onClose, onSaved, supabase }) {
   const save = async () => {
     if (!merchant || !amount) return;
     setSaving(true);
-    const { error } = await supabase.from("receipts").insert({
-      merchant,
-      amount: parseFloat(amount),
-      date,
-      category,
-      storage_path: null, // manual receipt
-    });
+    const { error } = await supabase.from("receipts").insert({ merchant, amount:parseFloat(amount), date, category, storage_path:null });
     setSaving(false);
     if (!error) onSaved();
   };
@@ -1820,10 +1937,10 @@ function ReceiptFormModal({ open, onClose, onSaved, supabase }) {
 function TellerPage() {
   const { supabase } = useAuth();
   const { toast } = useToast();
-  const [amount, setAmount]     = useState("0.00");
-  const [note, setNote]         = useState("");
-  const [direction, setDir]     = useState("credit");
-  const [entries, setEntries]   = useState([]);
+  const [amount, setAmount]   = useState("0.00");
+  const [note, setNote]       = useState("");
+  const [direction, setDir]   = useState("credit");
+  const [entries, setEntries] = useState([]);
 
   const load = useCallback(async () => {
     if (!supabase) return;
@@ -1858,7 +1975,9 @@ function TellerPage() {
   return (
     <PageShell>
       <PageHeader title="Teller Console" sub="Record cash-in and cash-out transactions"/>
-      <div style={{ display:"grid", gridTemplateColumns:"360px 1fr", gap:"2.5rem", alignItems:"start" }}>
+      {/* FIX: was hardcoded "360px 1fr", now uses responsive class */}
+      <div className="teller-grid">
+        {/* Numpad */}
         <div style={{ background:T.mid, border:`1px solid ${T.border}`, padding:"2rem" }}>
           <div style={{ background:"rgba(10,15,30,.6)", border:`1px solid ${T.border}`, padding:"1.25rem 1.5rem", marginBottom:"1.5rem", textAlign:"right" }}>
             <div style={{ fontFamily:T.fontMono, fontSize:".6rem", color:T.slate, letterSpacing:".1em", textTransform:"uppercase", marginBottom:".25rem" }}>Amount</div>
@@ -1886,8 +2005,9 @@ function TellerPage() {
           <Btn onClick={post} style={{ width:"100%" }}>Post Entry →</Btn>
         </div>
 
+        {/* Log */}
         <div>
-          <div style={{ display:"flex", gap:"1rem", marginBottom:"1.5rem" }}>
+          <div className="teller-summary">
             <div style={{ flex:1, background:T.electric10, border:`1px solid ${T.electric20}`, padding:"1rem 1.25rem" }}>
               <div style={{ fontFamily:T.fontMono, fontSize:".6rem", color:T.electric, letterSpacing:".1em", textTransform:"uppercase", marginBottom:".4rem" }}>Total Credit</div>
               <div style={{ fontFamily:T.fontDisplay, fontWeight:800, color:T.electric, fontSize:"1.3rem" }}>+₦{totalCredit.toLocaleString("en-NG",{minimumFractionDigits:2})}</div>
@@ -1901,12 +2021,12 @@ function TellerPage() {
           {entries.length===0 ? <EmptyState icon="⬡" title="No entries yet" sub="Post your first teller entry." compact/> : (
             <div style={{ display:"flex", flexDirection:"column", gap:".5rem" }}>
               {entries.map(e => (
-                <div key={e.id} style={{ background:T.mid, border:`1px solid ${T.border}`, padding:"1rem 1.25rem", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                  <div>
+                <div key={e.id} style={{ background:T.mid, border:`1px solid ${T.border}`, padding:"1rem 1.25rem", display:"flex", justifyContent:"space-between", alignItems:"center", gap:"1rem" }}>
+                  <div style={{ minWidth:0 }}>
                     <div style={{ fontFamily:T.fontMono, fontSize:".7rem", color:T.slate, marginBottom:".25rem" }}>{new Date(e.created_at).toLocaleTimeString("en-NG")}</div>
-                    <div style={{ fontSize:".82rem", color:T.white }}>{e.note||"—"}</div>
+                    <div style={{ fontSize:".82rem", color:T.white, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{e.note||"—"}</div>
                   </div>
-                  <div style={{ textAlign:"right" }}>
+                  <div style={{ textAlign:"right", flexShrink:0 }}>
                     <div style={{ fontFamily:T.fontDisplay, fontWeight:700, fontSize:"1rem", color:e.direction==="credit"?T.electric:T.red }}>
                       {e.direction==="credit"?"+":"-"}₦{Number(e.amount).toLocaleString("en-NG",{minimumFractionDigits:2})}
                     </div>
@@ -1981,8 +2101,8 @@ export default function App() {
 }
 
 function AppRoutes() {
-  const { session }         = useAuth();
-  const { path, navigate }  = useRouter();
+  const { session }        = useAuth();
+  const { path, navigate } = useRouter();
 
   if (session === undefined) return (
     <div style={{ minHeight:"100vh", background:T.ink, display:"flex", alignItems:"center", justifyContent:"center" }}>
@@ -1992,10 +2112,8 @@ function AppRoutes() {
     </div>
   );
 
-  // Logged-in users landing → dashboard
   if (session && path === "/") { navigate("/dashboard"); return null; }
 
-  // Protect app routes
   const protected_paths = ["/dashboard","/invoices","/payroll","/receipts","/teller","/settings"];
   if (!session && protected_paths.some(p => path.startsWith(p))) return <LoginPage/>;
 
