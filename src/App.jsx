@@ -1,5 +1,5 @@
 /**
- * Finexa — App.jsx  (fully responsive, all issues fixed)
+ * Finexia — App.jsx  (fully responsive, all issues fixed)
  * Fixes:
  * - Hamburger hidden on desktop, shown on mobile only
  * - Nav links properly toggled on mobile
@@ -603,7 +603,7 @@ class ErrorBoundary extends Component {
   render() {
     if (this.state.error) return (
       <div style={{ minHeight:"100vh", background:T.ink, display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:"1rem", padding:"2rem" }}>
-        <div style={{ fontFamily:T.fontDisplay, color:T.gold, fontSize:"1.8rem", fontWeight:800 }}>Finexa</div>
+        <div style={{ fontFamily:T.fontDisplay, color:T.gold, fontSize:"1.8rem", fontWeight:800 }}>Finexia</div>
         <div style={{ color:T.white, fontSize:"1.1rem" }}>Something went wrong</div>
         <div style={{ color:T.red, background:T.red10, border:`1px solid ${T.red}`, padding:"1rem 1.5rem", maxWidth:520, fontSize:".78rem", wordBreak:"break-all", fontFamily:T.fontMono }}>
           {this.state.error.message}
@@ -903,7 +903,7 @@ function InteractiveDemoModal({ open, onClose }) {
 
   if (!open) return null;
   return (
-    <Modal open={open} onClose={onClose} title="See Finexa in Action" width={700}>
+    <Modal open={open} onClose={onClose} title="See Finexia in Action" width={700}>
       <div style={{ textAlign:"center" }}>
         <div style={{ display:"flex", justifyContent:"center", gap:".75rem", marginBottom:"1.5rem", flexWrap:"wrap" }}>
           {steps.map((s, i) => (
@@ -953,7 +953,7 @@ function BenefitsSection({ navigate }) {
     <section id="benefits" style={{ padding:"8rem 2rem", background:T.ink, position:"relative", zIndex:1 }}>
       <div style={{ maxWidth:1100, margin:"0 auto" }}>
         <div className="reveal" style={{ marginBottom:"4rem", textAlign:"center" }}>
-          <div style={{ fontFamily:T.fontMono, fontSize:".62rem", color:T.electric, letterSpacing:".2em", textTransform:"uppercase", marginBottom:"1rem" }}>— Why Finexa</div>
+          <div style={{ fontFamily:T.fontMono, fontSize:".62rem", color:T.electric, letterSpacing:".2em", textTransform:"uppercase", marginBottom:"1rem" }}>— Why Finexia</div>
           <h2 style={{ fontFamily:T.fontDisplay, fontWeight:800, fontSize:"clamp(2rem,5vw,3.5rem)", color:T.white, letterSpacing:"-.03em" }}>
             Built for synergy,<br/>designed for growth
           </h2>
@@ -1151,7 +1151,7 @@ function LandingPage() {
           </h1>
 
           <p style={{ marginTop:"2rem", maxWidth:"90%", marginLeft:"auto", marginRight:"auto", fontSize:"1rem", lineHeight:1.8, color:T.slate, fontWeight:400, opacity:0, animation:"fadeUp .8s .4s cubic-bezier(.16,1,.3,1) forwards" }}>
-            <strong style={{ color:T.white, fontWeight:500 }}>Finexa</strong> is smart financial software that helps Nigerian businesses handle payments, payroll, invoices, and receipts — all in one place.
+            <strong style={{ color:T.white, fontWeight:500 }}>Finexia</strong> is smart financial software that helps Nigerian businesses handle payments, payroll, invoices, and receipts — all in one place.
           </p>
 
           <div className="hero-ctas" style={{ opacity:0, animation:"fadeUp .9s .5s cubic-bezier(.16,1,.3,1) forwards" }}>
@@ -1242,7 +1242,7 @@ function LandingPage() {
           </div>
           <div className="testi-grid">
             {[
-              { q:"Payroll used to take us 3 days. With Finexa it's done before lunch.",           name:"Ada Okonkwo",   role:"CFO, Acme Corp Lagos"             },
+              { q:"Payroll used to take us 3 days. With Finexia it's done before lunch.",           name:"Ada Okonkwo",   role:"CFO, Acme Corp Lagos"             },
               { q:"The teller console is exactly what our branch staff needed. Simple and fast.",   name:"Chidi Eze",     role:"Operations Lead, Starfield Finance" },
               { q:"Finally a fintech tool built for how Nigerian businesses actually work.",        name:"Ngozi Adeyemi", role:"Founder, Blue Horizon Ltd"          },
             ].map((t,i) => (
@@ -1283,7 +1283,7 @@ function LandingPage() {
                   ))}
                 </div>
                 <button
-                  onClick={p.name==="Enterprise" ? ()=>window.location.href="mailto:hello@finexa.ng" : goLogin}
+                  onClick={p.name==="Enterprise" ? ()=>window.location.href="mailto:hello@Finexia.ng" : goLogin}
                   className={p.featured?"btn-land-primary":"btn-land-secondary"}
                   style={{ width:"100%", padding:".85rem", fontSize:".82rem", justifyContent:"center" }}>
                   {p.cta}
@@ -1335,7 +1335,7 @@ function LandingPage() {
           </div>
         </div>
         <div className="footer-bottom">
-          <div style={{ fontFamily:T.fontMono, fontSize:".6rem", color:T.slate }}>© {new Date().getFullYear()} Finexa. Finance, Engineered for What's Next.</div>
+          <div style={{ fontFamily:T.fontMono, fontSize:".6rem", color:T.slate }}>© {new Date().getFullYear()} Finexia. Finance, Engineered for What's Next.</div>
           <div style={{ display:"flex", gap:"1.25rem" }}>
             {["Privacy","Terms","Support"].map(l => (
               <a key={l} href="#/" style={{ fontFamily:T.fontMono, fontSize:".6rem", color:T.slate, textDecoration:"none", letterSpacing:".06em", transition:"color .2s" }}
@@ -1405,7 +1405,7 @@ function LoginPage() {
           — {mode === "signin" ? "Welcome back" : "Create account"}
         </div>
         <h1 style={{ fontFamily:T.fontDisplay, fontWeight:800, fontSize:"1.6rem", color:T.white, letterSpacing:"-.03em", marginBottom:"2rem" }}>
-          {mode === "signin" ? "Sign in to Finexa" : "Get started free"}
+          {mode === "signin" ? "Sign in to Finexia" : "Get started free"}
         </h1>
 
         <div style={{ display:"flex", flexDirection:"column", gap:"1.25rem" }}>
