@@ -1105,7 +1105,10 @@ function RecentTransactions({ supabase }) {
   return (
     <table style={{ width:"100%", borderCollapse:"collapse" }}>
       <thead>
-        <tr>{["Reference","Type","Amount","Date"].map(h => <th key={h} style={{ fontFamily:T.fontMono, fontSize:".6rem", color:T.slate, letterSpacing:".1em", textTransform:"uppercase", textAlign:"left", paddingBottom:".75rem", borderBottom:`1px solid ${T.border}` }}>{h}</th>)}</thead>
+        <tr>
+          {["Reference","Type","Amount","Date"].map(h => <th key={h} style={{ fontFamily:T.fontMono, fontSize:".6rem", color:T.slate, letterSpacing:".1em", textTransform:"uppercase", textAlign:"left", paddingBottom:".75rem", borderBottom:`1px solid ${T.border}` }}>{h}</th>)}
+        </tr>
+      </thead>
       <tbody>
         {rows.map(r => (
           <tr key={r.id}>
