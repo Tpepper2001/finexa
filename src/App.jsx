@@ -1,13 +1,14 @@
 /**
- * Finexa — App.jsx  (fully fixed)
+ * Finexa — App.jsx  (fully enhanced)
  * - Landing page with all animations restored
  * - Every button and nav link wired up
  * - Scroll-reveal on sections
  * - Particle system, orbs, grid drift
  * - Hash router: / → Landing, /login → Auth, /dashboard etc → App
  * - Fixed navbar links (smooth scroll to sections)
- * - Added "See Demo" button with modal
- * - How It Works section replaced with interactive animated carousel
+ * - Interactive Demo Modal (JS animations, not video)
+ * - Added Benefits Section (including module syncing)
+ * - Receipts: manual creation + upload
  */
 
 import { useState, useEffect, useCallback, useRef, createContext, useContext, Component } from "react";
@@ -62,6 +63,15 @@ const GLOBAL_CSS = `
     80% { opacity:1; }
     100%{ opacity:0; transform:translateY(-40px); }
   }
+  @keyframes bounceIn {
+    0% { opacity:0; transform:scale(0.8); }
+    80% { transform:scale(1.05); }
+    100% { opacity:1; transform:scale(1); }
+  }
+  @keyframes spin {
+    from { transform:rotate(0deg); }
+    to { transform:rotate(360deg); }
+  }
 
   .reveal { opacity:0; transform:translateY(28px); transition:opacity .75s cubic-bezier(.16,1,.3,1), transform .75s cubic-bezier(.16,1,.3,1); }
   .reveal.visible { opacity:1; transform:none; }
@@ -73,6 +83,9 @@ const GLOBAL_CSS = `
 
   .feat-card { background:#1C2340; border:1px solid rgba(200,169,110,.18); border-left:2px solid transparent; padding:2rem; transition:all .25s; cursor:default; }
   .feat-card:hover { background:rgba(200,169,110,.05); border-left-color:#C8A96E; transform:translateY(-3px); box-shadow:0 12px 40px rgba(0,0,0,.3); }
+
+  .benefit-card { background:#1C2340; border:1px solid rgba(200,169,110,.18); padding:2rem; transition:all .25s; cursor:default; }
+  .benefit-card:hover { background:rgba(200,169,110,.05); transform:translateY(-3px); box-shadow:0 12px 40px rgba(0,0,0,.3); }
 
   .step-card { border:1px solid rgba(200,169,110,.18); padding:2rem; background:#0A0F1E; transition:all .25s; cursor:default; }
   .step-card:hover { border-color:rgba(200,169,110,.5); transform:translateY(-4px); box-shadow:0 16px 48px rgba(0,0,0,.35); }
@@ -310,38 +323,232 @@ function useScrollReveal() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// NEW: Demo Modal Component
+// NEW: Interactive Demo Modal (JS animation, not video)
 // ═══════════════════════════════════════════════════════════════
-function DemoModal({ open, onClose }) {
+function InteractiveDemoModal({ open, onClose }) {
+  const [step, setStep] = useState(0);
+  const [animating, setAnimating] = useState(false);
+
+  const steps = [
+    {
+      title: "Invoicing",
+      icon: "◻",
+      description: "Create professional invoices in seconds. Track status: draft, sent, paid, or overdue.",
+      demo: (
+        <div style={{ background:T.ink, padding:"1rem", borderRadius:"0.5rem", textAlign:"center" }}>
+          <div style={{ fontFamily:T.fontMono, fontSize:".7rem", color:T.slate, marginBottom:".5rem" }}>New Invoice</div>
+          <div style={{ background:T.mid, padding:"0.5rem", borderRadius:"0.25rem", marginBottom:"0.5rem" }}>
+            <div>Client: Acme Corp</div>
+            <div>Amount: ₦250,000</div>
+            <div style={{ color:T.gold }}>Status: Draft</div>
+          </div>
+          <div className="btn-land-primary" style={{ padding:".3rem .6rem", fontSize:".7rem", display:"inline-block" }}>Send Invoice</div>
+        </div>
+      ),
+    },
+    {
+      title: "Payroll",
+      icon: "◈",
+      description: "Add employees, set salaries, run payroll in one click. PAYE and pension auto-calculated.",
+      demo: (
+        <div style={{ background:T.ink, padding:"1rem", borderRadius:"0.5rem", textAlign:"center" }}>
+          <div style={{ fontFamily:T.fontMono, fontSize:".7rem", color:T.slate, marginBottom:".5rem" }}>Run Payroll</div>
+          <div style={{ display:"flex", justifyContent:"space-between", marginBottom:"0.5rem", fontSize:".7rem" }}>
+            <span>Ada Okonkwo</span><span>₦350,000</span>
+          </div>
+          <div style={{ display:"flex", justifyContent:"space-between", marginBottom:"0.5rem", fontSize:".7rem" }}>
+            <span>Chidi Eze</span><span>₦420,000</span>
+          </div>
+          <div style={{ borderTop:`1px solid ${T.border}`, marginTop:".5rem", paddingTop:".5rem", fontWeight:700 }}>Total: ₦770,000</div>
+          <div className="btn-land-primary" style={{ padding:".3rem .6rem", fontSize:".7rem", display:"inline-block", marginTop:".5rem" }}>Process Payroll</div>
+        </div>
+      ),
+    },
+    {
+      title: "Receipts",
+      icon: "◉",
+      description: "Upload or create receipts manually. Attach files, tag merchants, and categorize expenses.",
+      demo: (
+        <div style={{ background:T.ink, padding:"1rem", borderRadius:"0.5rem", textAlign:"center" }}>
+          <div style={{ fontFamily:T.fontMono, fontSize:".7rem", color:T.slate, marginBottom:".5rem" }}>Recent Receipt</div>
+          <div style={{ background:T.mid, padding:"0.5rem", borderRadius:"0.25rem" }}>
+            <div>Merchant: ABC Supplies</div>
+            <div>Amount: ₦45,000</div>
+            <div>Category: Office Expenses</div>
+            <div className="btn-land-primary" style={{ padding:".2rem .5rem", fontSize:".6rem", display:"inline-block", marginTop:".5rem" }}>View File →</div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: "Teller Console",
+      icon: "⬡",
+      description: "Record cash-in and cash-out with a numpad interface. Full daily ledger with session history.",
+      demo: (
+        <div style={{ background:T.ink, padding:"1rem", borderRadius:"0.5rem", textAlign:"center" }}>
+          <div style={{ fontFamily:T.fontMono, fontSize:".7rem", color:T.slate, marginBottom:".5rem" }}>Teller Entry</div>
+          <div style={{ background:T.mid, padding:"0.5rem", borderRadius:"0.25rem", marginBottom:"0.5rem" }}>
+            <div>Amount: ₦12,500</div>
+            <div>Direction: ↑ Credit</div>
+            <div>Note: Customer payment</div>
+          </div>
+          <div style={{ display:"flex", gap:".5rem", justifyContent:"center" }}>
+            <div className="btn-land-primary" style={{ padding:".2rem .5rem", fontSize:".6rem", display:"inline-block" }}>Post Entry</div>
+          </div>
+        </div>
+      ),
+    },
+  ];
+
+  const nextStep = () => {
+    if (animating) return;
+    setAnimating(true);
+    setTimeout(() => {
+      setStep((s) => (s + 1) % steps.length);
+      setAnimating(false);
+    }, 200);
+  };
+  const prevStep = () => {
+    if (animating) return;
+    setAnimating(true);
+    setTimeout(() => {
+      setStep((s) => (s - 1 + steps.length) % steps.length);
+      setAnimating(false);
+    }, 200);
+  };
+
   if (!open) return null;
   return (
-    <Modal open={open} onClose={onClose} title="See Finexa in Action" width={800}>
-      <div style={{ textAlign: "center" }}>
+    <Modal open={open} onClose={onClose} title="See Finexa in Action" width={700}>
+      <div style={{ textAlign:"center" }}>
+        <div style={{ display:"flex", justifyContent:"center", gap:"1rem", marginBottom:"1rem" }}>
+          {steps.map((s, i) => (
+            <button
+              key={i}
+              onClick={() => { setStep(i); }}
+              style={{
+                background: step===i ? T.gold10 : "transparent",
+                border: `1px solid ${step===i ? T.gold : T.border}`,
+                color: step===i ? T.gold : T.slate,
+                fontFamily:T.fontMono,
+                fontSize:".7rem",
+                padding:".4rem .8rem",
+                cursor:"pointer",
+                borderRadius:"2rem",
+                transition:"all .2s",
+              }}
+            >
+              {s.icon} {s.title}
+            </button>
+          ))}
+        </div>
         <div
+          key={step}
           style={{
-            background: T.ink,
+            animation: animating ? "fadeUp 0.2s ease-out" : "bounceIn 0.4s cubic-bezier(0.16,1,0.3,1)",
+            background: T.mid,
+            border: `1px solid ${T.border}`,
+            borderRadius: "1rem",
             padding: "2rem",
-            borderRadius: "0.5rem",
-            marginBottom: "1rem",
+            marginBottom: "2rem",
           }}
         >
-          {/* Replace with actual demo video URL */}
-          <iframe
-            width="100%"
-            height="400"
-            src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=0"
-            title="Finexa Demo"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            style={{ borderRadius: "0.5rem" }}
-          ></iframe>
+          <div style={{ fontSize:"2rem", marginBottom:"1rem" }}>{steps[step].icon}</div>
+          <h3 style={{ fontFamily:T.fontDisplay, fontWeight:800, fontSize:"1.4rem", color:T.white, marginBottom:".5rem" }}>{steps[step].title}</h3>
+          <p style={{ color:T.slate, fontSize:".9rem", marginBottom:"1.5rem" }}>{steps[step].description}</p>
+          {steps[step].demo}
         </div>
-        <p style={{ color: T.slate, fontSize: "0.85rem", marginTop: "1rem" }}>
-          Watch a quick tour of Finexa’s core features – invoicing, payroll, teller console, and more.
+        <div style={{ display:"flex", gap:"1rem", justifyContent:"center" }}>
+          <button onClick={prevStep} style={{ background:T.mid, border:`1px solid ${T.border}`, color:T.white, padding:".5rem 1rem", borderRadius:"2rem", cursor:"pointer" }}>← Previous</button>
+          <button onClick={nextStep} style={{ background:T.gold, border:"none", color:T.ink, padding:".5rem 1rem", borderRadius:"2rem", cursor:"pointer", fontWeight:700 }}>Next →</button>
+        </div>
+        <p style={{ color:T.slate, fontSize:".7rem", marginTop:"1.5rem" }}>
+          Click through to see how Finexa’s modules work. Ready to try it yourself? <button onClick={()=>{ onClose(); window.location.hash="/login"; }} style={{ background:"none", border:"none", color:T.gold, textDecoration:"underline", cursor:"pointer" }}>Sign up free</button>
         </p>
       </div>
     </Modal>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NEW: Benefits Section (including module syncing)
+// ═══════════════════════════════════════════════════════════════
+function BenefitsSection({ navigate }) {
+  const benefits = [
+    {
+      icon: "🔄",
+      title: "Seamless Sync",
+      description: "All modules talk to each other. Create an invoice → payment recorded in Teller → receipt auto‑attached. Payroll entries feed into general ledger automatically.",
+    },
+    {
+      icon: "⚡",
+      title: "Real‑time Updates",
+      description: "Live dashboard updates as transactions happen. Never miss a payment or deadline.",
+    },
+    {
+      icon: "🔒",
+      title: "Bank‑Grade Security",
+      description: "Row‑level security, encrypted data, and audit logs keep your financials safe.",
+    },
+    {
+      icon: "📊",
+      title: "Actionable Insights",
+      description: "Get instant reports on cash flow, outstanding invoices, and payroll costs.",
+    },
+  ];
+
+  const modules = ["Invoicing", "Payroll", "Receipts", "Teller"];
+
+  return (
+    <section id="benefits" style={{ padding:"8rem 4rem", background:T.ink, position:"relative", zIndex:1 }}>
+      <div style={{ maxWidth:1100, margin:"0 auto" }}>
+        <div className="reveal" style={{ marginBottom:"4rem", textAlign:"center" }}>
+          <div style={{ fontFamily:T.fontMono, fontSize:".62rem", color:T.electric, letterSpacing:".2em", textTransform:"uppercase", marginBottom:"1rem" }}>— Why Finexa</div>
+          <h2 style={{ fontFamily:T.fontDisplay, fontWeight:800, fontSize:"clamp(2rem,5vw,3.5rem)", color:T.white, letterSpacing:"-.03em" }}>
+            Built for synergy,<br/>designed for growth
+          </h2>
+        </div>
+
+        {/* Benefits cards */}
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))", gap:"2rem", marginBottom:"4rem" }}>
+          {benefits.map((b,i) => (
+            <div key={b.title} className="benefit-card reveal" style={{ transitionDelay:`${i*.1}s` }}>
+              <div style={{ fontSize:"2rem", marginBottom:"1rem", color:T.gold }}>{b.icon}</div>
+              <div style={{ fontFamily:T.fontDisplay, fontWeight:700, color:T.white, fontSize:"1.1rem", marginBottom:".6rem" }}>{b.title}</div>
+              <div style={{ fontSize:".82rem", color:T.slate, lineHeight:1.75 }}>{b.description}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Module sync visual */}
+        <div className="reveal" style={{ background:T.mid, border:`1px solid ${T.border}`, borderRadius:"2rem", padding:"2rem", textAlign:"center" }}>
+          <div style={{ fontFamily:T.fontMono, fontSize:".62rem", color:T.electric, letterSpacing:".1em", marginBottom:"1rem" }}>— How they work together</div>
+          <h3 style={{ fontFamily:T.fontDisplay, fontWeight:700, fontSize:"1.4rem", color:T.white, marginBottom:"1rem" }}>One ecosystem, endless possibilities</h3>
+          <div style={{ display:"flex", flexWrap:"wrap", justifyContent:"center", gap:"2rem", margin:"2rem 0" }}>
+            {modules.map((mod, idx) => (
+              <div key={mod} style={{ textAlign:"center", position:"relative" }}>
+                <div style={{ background:T.gold10, borderRadius:"50%", width:"60px", height:"60px", display:"flex", alignItems:"center", justifyContent:"center", marginBottom:".5rem", fontSize:"1.8rem" }}>
+                  {mod === "Invoicing" && "◻"}
+                  {mod === "Payroll" && "◈"}
+                  {mod === "Receipts" && "◉"}
+                  {mod === "Teller" && "⬡"}
+                </div>
+                <div style={{ fontFamily:T.fontMono, fontSize:".7rem", color:T.slate }}>{mod}</div>
+                {idx < modules.length-1 && (
+                  <div style={{ position:"absolute", top:"30px", right:"-30px", color:T.gold, fontSize:"1.2rem" }}>→</div>
+                )}
+              </div>
+            ))}
+          </div>
+          <p style={{ color:T.slate, fontSize:".9rem", maxWidth:600, margin:"0 auto" }}>
+            An invoice paid triggers a teller entry, updates the ledger, and attaches the receipt automatically. Payroll runs are synced with your cash balance. Everything stays in harmony.
+          </p>
+          <div style={{ marginTop:"2rem" }}>
+            <button onClick={() => navigate("/dashboard")} className="btn-land-primary" style={{ fontSize:".85rem" }}>Experience the Sync →</button>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -574,7 +781,7 @@ function HowItWorksSection({ navigate, goLogin }) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// LANDING PAGE (updated with fixed nav, demo modal, new How It Works)
+// LANDING PAGE (updated with fixed nav, interactive demo, benefits section)
 // ═══════════════════════════════════════════════════════════════
 function LandingPage() {
   const { navigate }  = useRouter();
@@ -627,6 +834,7 @@ function LandingPage() {
         </a>
         <div style={{ display:"flex", alignItems:"center", gap:"1.75rem" }}>
           <button onClick={() => scrollTo("features")} className="nav-link-land" style={{ background: "none", border: "none", cursor: "pointer" }}>Features</button>
+          <button onClick={() => scrollTo("benefits")} className="nav-link-land" style={{ background: "none", border: "none", cursor: "pointer" }}>Benefits</button>
           <button onClick={() => scrollTo("how-it-works")} className="nav-link-land" style={{ background: "none", border: "none", cursor: "pointer" }}>How It Works</button>
           <button onClick={() => scrollTo("pricing")} className="nav-link-land" style={{ background: "none", border: "none", cursor: "pointer" }}>Pricing</button>
           <button onClick={() => scrollTo("testimonials")} className="nav-link-land" style={{ background: "none", border: "none", cursor: "pointer" }}>Reviews</button>
@@ -730,7 +938,7 @@ function LandingPage() {
             {[
               { icon:"◻", title:"Invoicing",       desc:"Create and send professional invoices. Track status in real time — draft, sent, paid, or overdue.", href:"/invoices" },
               { icon:"◈", title:"Payroll",          desc:"Add employees, set salaries, run payroll in one click. PAYE and pension auto-calculated.",          href:"/payroll"  },
-              { icon:"◉", title:"Receipts",         desc:"Upload and organise expense receipts. Attach files, tag merchants, filter by category.",            href:"/receipts" },
+              { icon:"◉", title:"Receipts",         desc:"Upload or create receipts manually. Organise expenses, attach files, filter by category.",            href:"/receipts" },
               { icon:"⬡", title:"Teller Console",   desc:"Record cash-in and cash-out with a numpad interface. Full daily ledger with session history.",       href:"/teller"   },
               { icon:"▦", title:"Live Dashboard",   desc:"Real-time stats on transactions, invoices, and payroll. Powered by Supabase Realtime.",              href:"/dashboard"},
               { icon:"◎", title:"Secure by Design", desc:"Row-level security on every table. Your data is only ever visible to your organisation.",            href:null        },
@@ -746,6 +954,9 @@ function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* ── BENEFITS (new) ── */}
+      <BenefitsSection navigate={navigate} />
 
       {/* ── HOW IT WORKS (replaced with interactive carousel) ── */}
       <HowItWorksSection navigate={navigate} goLogin={goLogin} />
@@ -842,6 +1053,7 @@ function LandingPage() {
           <div style={{ display:"flex", gap:"2rem", flexWrap:"wrap" }}>
             {[
               ["Features", "features"],
+              ["Benefits", "benefits"],
               ["How It Works", "how-it-works"],
               ["Pricing", "pricing"],
               ["Reviews", "testimonials"]
@@ -874,8 +1086,8 @@ function LandingPage() {
         </div>
       </footer>
 
-      {/* Demo Modal */}
-      <DemoModal open={demoOpen} onClose={() => setDemoOpen(false)} />
+      {/* Interactive Demo Modal */}
+      <InteractiveDemoModal open={demoOpen} onClose={() => setDemoOpen(false)} />
     </div>
   );
 }
@@ -1072,7 +1284,7 @@ function DashboardPage() {
         {[
           { label:"New Invoice",    icon:"◻", href:"/invoices"  },
           { label:"Run Payroll",    icon:"◈", href:"/payroll"   },
-          { label:"Upload Receipt", icon:"◉", href:"/receipts"  },
+          { label:"New Receipt",    icon:"◉", href:"/receipts"  },
           { label:"Open Teller",    icon:"⬡", href:"/teller"    },
         ].map(a => (
           <button key={a.label} onClick={() => navigate(a.href)} style={{ background:T.gold10, border:`1px solid ${T.border}`, color:T.white, fontFamily:T.fontDisplay, fontWeight:600, fontSize:".82rem", padding:"1.25rem", cursor:"pointer", display:"flex", alignItems:"center", gap:".75rem", transition:"all .2s" }}
@@ -1107,8 +1319,7 @@ function RecentTransactions({ supabase }) {
       <thead>
         <tr>
           {["Reference","Type","Amount","Date"].map(h => <th key={h} style={{ fontFamily:T.fontMono, fontSize:".6rem", color:T.slate, letterSpacing:".1em", textTransform:"uppercase", textAlign:"left", paddingBottom:".75rem", borderBottom:`1px solid ${T.border}` }}>{h}</th>)}
-        </tr>
-      </thead>
+        </thead>
       <tbody>
         {rows.map(r => (
           <tr key={r.id}>
@@ -1126,7 +1337,7 @@ function RecentTransactions({ supabase }) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// INVOICES
+// INVOICES (unchanged)
 // ═══════════════════════════════════════════════════════════════
 function InvoicesPage() {
   const { supabase } = useAuth();
@@ -1229,7 +1440,7 @@ function InvoiceFormModal({ open, onClose, onSaved, supabase }) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// PAYROLL
+// PAYROLL (unchanged)
 // ═══════════════════════════════════════════════════════════════
 function PayrollPage() {
   const { supabase } = useAuth();
@@ -1340,13 +1551,14 @@ function EmployeeFormModal({ open, onClose, onSaved, supabase }) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// RECEIPTS
+// RECEIPTS (enhanced: manual creation + upload)
 // ═══════════════════════════════════════════════════════════════
 function ReceiptsPage() {
   const { supabase } = useAuth();
   const { toast } = useToast();
   const [receipts, setReceipts]   = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [showForm, setShowForm]   = useState(false);
 
   const load = useCallback(async () => {
     if (!supabase) return;
@@ -1372,13 +1584,16 @@ function ReceiptsPage() {
 
   return (
     <PageShell>
-      <PageHeader title="Receipts" sub="Upload and manage expense receipts" action={
-        <label style={{ background:T.gold, color:T.ink, fontFamily:T.fontDisplay, fontWeight:700, fontSize:".82rem", letterSpacing:".05em", padding:".75rem 1.5rem", cursor:"pointer" }}>
-          {uploading?"Uploading…":"+ Upload Receipt"}
-          <input type="file" accept="image/*,application/pdf" onChange={handleUpload} style={{ display:"none" }}/>
-        </label>
+      <PageHeader title="Receipts" sub="Upload or manually create receipts" action={
+        <div style={{ display:"flex", gap:"1rem" }}>
+          <Btn onClick={()=>setShowForm(true)}>+ New Receipt</Btn>
+          <label style={{ background:T.gold, color:T.ink, fontFamily:T.fontDisplay, fontWeight:700, fontSize:".82rem", letterSpacing:".05em", padding:".75rem 1.5rem", cursor:"pointer" }}>
+            {uploading?"Uploading…":"+ Upload Receipt"}
+            <input type="file" accept="image/*,application/pdf" onChange={handleUpload} style={{ display:"none" }}/>
+          </label>
+        </div>
       }/>
-      {receipts.length===0 ? <EmptyState icon="◉" title="No receipts" sub="Upload your first receipt above."/> : (
+      {receipts.length===0 ? <EmptyState icon="◉" title="No receipts" sub="Create your first receipt above."/> : (
         <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))", gap:"1rem" }}>
           {receipts.map(r => (
             <div key={r.id} style={{ background:T.mid, border:`1px solid ${T.border}`, padding:"1.5rem", transition:"border-color .2s" }}
@@ -1397,12 +1612,50 @@ function ReceiptsPage() {
           ))}
         </div>
       )}
+      <ReceiptFormModal open={showForm} onClose={()=>setShowForm(false)} onSaved={()=>{ setShowForm(false); load(); toast("Receipt created","success"); }} supabase={supabase}/>
     </PageShell>
   );
 }
 
+function ReceiptFormModal({ open, onClose, onSaved, supabase }) {
+  const [merchant, setMerchant] = useState("");
+  const [amount, setAmount]     = useState("");
+  const [date, setDate]         = useState(new Date().toISOString().split("T")[0]);
+  const [category, setCategory] = useState("");
+  const [saving, setSaving]     = useState(false);
+
+  const save = async () => {
+    if (!merchant || !amount) return;
+    setSaving(true);
+    const { error } = await supabase.from("receipts").insert({
+      merchant,
+      amount: parseFloat(amount),
+      date,
+      category,
+      storage_path: null, // manual receipt
+    });
+    setSaving(false);
+    if (!error) onSaved();
+  };
+
+  return (
+    <Modal open={open} onClose={onClose} title="New Receipt">
+      <div style={{ display:"flex", flexDirection:"column", gap:"1.25rem" }}>
+        <Input label="Merchant" value={merchant} onChange={e=>setMerchant(e.target.value)} placeholder="ABC Supplies"/>
+        <Input label="Amount (₦)" type="number" value={amount} onChange={e=>setAmount(e.target.value)} placeholder="45000"/>
+        <Input label="Date" type="date" value={date} onChange={e=>setDate(e.target.value)}/>
+        <Input label="Category (optional)" value={category} onChange={e=>setCategory(e.target.value)} placeholder="Office Expenses"/>
+        <div style={{ display:"flex", gap:"1rem", justifyContent:"flex-end" }}>
+          <Btn variant="secondary" onClick={onClose}>Cancel</Btn>
+          <Btn onClick={save} disabled={saving}>{saving?"Saving…":"Create Receipt"}</Btn>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
 // ═══════════════════════════════════════════════════════════════
-// TELLER
+// TELLER (unchanged)
 // ═══════════════════════════════════════════════════════════════
 function TellerPage() {
   const { supabase } = useAuth();
@@ -1510,7 +1763,7 @@ function TellerPage() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// SETTINGS
+// SETTINGS (unchanged)
 // ═══════════════════════════════════════════════════════════════
 function SettingsPage() {
   const { supabase, profile } = useAuth();
